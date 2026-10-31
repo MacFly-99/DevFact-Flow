@@ -26,13 +26,20 @@ export default async function QuotesPage() {
       ) : (
         <div className="grid gap-4">
           {quotes.map((quote) => (
-            <div key={quote.id} className="bg-white/5 p-4 rounded-lg border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-white/10 transition-colors">
+            <Link 
+              href={`/quotes/${quote.id}`} 
+              key={quote.id} 
+              className="flex bg-white/5 p-4 rounded-lg border border-white/10 flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-200 group"
+            >
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded text-sm">
+                  <span className="font-mono text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded text-sm group-hover:bg-brand-accent/20 transition-colors">
                     {quote.number}
                   </span>
-                  <h3 className="font-bold text-lg text-text-main">{quote.client.name}</h3>
+                  <h3 className="font-bold text-lg text-text-main">
+                    {/* On affiche l'entreprise si elle existe, sinon le nom du contact */}
+                    {quote.client.companyName || quote.client.name}
+                  </h3>
                 </div>
                 <p className="text-xs text-text-muted">
                   Créé le {new Date(quote.createdAt).toLocaleDateString('fr-FR')}
@@ -41,11 +48,11 @@ export default async function QuotesPage() {
               
               <div className="text-left md:text-right w-full md:w-auto flex md:block justify-between items-center border-t md:border-t-0 border-white/10 pt-3 md:pt-0 mt-2 md:mt-0">
                 <p className="font-bold text-lg">{quote.total.toFixed(2)} €</p>
-                <span className="text-xs font-medium px-2 py-1 bg-white/10 rounded-full uppercase tracking-wider text-text-muted">
+                <span className="text-xs font-medium px-2 py-1 bg-white/10 rounded-full uppercase tracking-wider text-text-muted group-hover:text-brand-accent transition-colors">
                   {quote.status}
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
