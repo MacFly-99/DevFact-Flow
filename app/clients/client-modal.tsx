@@ -1,4 +1,3 @@
-// app/clients/client-modal.tsx
 "use client";
 
 import { useState } from "react";
@@ -31,23 +30,35 @@ export function ClientModal() {
         </DialogHeader>
 
         <form action={handleSubmit} className="space-y-4 mt-4">
+          
+          <div>
+            <label htmlFor="companyName" className="block text-sm font-medium mb-2">
+              Nom de l'entreprise
+            </label>
+            <input 
+              type="text" name="companyName" id="companyName" 
+              className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+              placeholder="Ex: Acme Corp (Optionnel)"
+            />
+          </div>
+
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-2">
-              Nom de l'entreprise / du client *
+              Nom du contact *
             </label>
             <input 
               type="text" name="name" id="name" required
               className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
-              placeholder="Ex: Acme Corp"
+              placeholder="Ex: Jean Dupont"
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email
+              Email *
             </label>
             <input 
-              type="email" name="email" id="email" 
+              type="email" name="email" id="email" required
               className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
               placeholder="contact@acme.com"
             />
@@ -60,13 +71,13 @@ export function ClientModal() {
             <input 
               type="tel" name="phone" id="phone" 
               className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
-              placeholder="06 12 34 56 78"
+              placeholder="06 12 34 56 78 (Optionnel)"
             />
           </div>
 
           <button 
             type="submit" 
-            className="w-full bg-brand-accent text-brand-night font-bold py-3 rounded-md hover:bg-brand-accent/90 transition-colors mt-2"
+            className="w-full bg-brand-accent text-brand-night font-bold py-3 rounded-md hover:bg-brand-accent/90 transition-colors mt-2 cursor-pointer"
           >
             Enregistrer le client
           </button>
