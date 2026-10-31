@@ -1,13 +1,76 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Client {
+  id        String    @id @default(uuid())
+  name      String
+  email     String?   @unique
+  phone     String?
+  address   String?
+  quotes    Quote[]
+  invoices  Invoice[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Quote {
+  id        String      @id @default(uuid())
+  number    String      @unique
+  status    QuoteStatus @default(DRAFT)
+  clientId  String
+  client    Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items     QuoteItem[]
+  total     Float       @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model QuoteItem {
+  id          String  @id @default(uuid())
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Float
+  quoteId     String
+  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id        String        @id @default(uuid())
+  number    String        @unique
+  status    InvoiceStatus @default(DRAFT)
+  clientId  String
+  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items     InvoiceItem[]
+  total     Float         @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Float
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
 }
