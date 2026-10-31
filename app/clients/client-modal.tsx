@@ -21,7 +21,7 @@ export function ClientModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<button className="bg-brand-accent text-brand-night px-4 py-2 rounded-md font-bold hover:bg-brand-accent/90 transition-colors cursor-pointer" />}>
+      <DialogTrigger render={<button className="w-full md:w-auto bg-brand-accent text-brand-night px-4 py-2 rounded-md font-bold hover:bg-brand-accent/90 transition-colors cursor-pointer" />}>
         + Nouveau Client
       </DialogTrigger>
       

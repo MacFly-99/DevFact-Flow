@@ -1,17 +1,15 @@
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="text-center space-y-6">
-        <h1 className="text-5xl font-bold tracking-tight">
-          DevFact <span className="text-brand-accent">Flow</span>
-        </h1>
-        <p className="text-xl text-text-muted max-w-2xl">
-          L'outil de devis et facturation ultra pro.
-        </p>
-        <button className="bg-brand-accent text-brand-night px-6 py-3 rounded-md font-bold hover:bg-brand-accent/90 transition-colors">
-          Créer mon premier devis
-        </button>
-      </div>
+    <main className="flex flex-1 flex-col items-center justify-center p-6 md:p-24 text-center">
+      <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 md:mb-6">
+        DevFact <span className="text-brand-accent">Flow</span>
+      </h1>
+      <p className="text-lg md:text-xl text-text-muted max-w-2xl mb-8 md:mb-10">
+        L'outil de devis et facturation ultra pro.
+      </p>
+      <button className="bg-brand-accent text-brand-night px-6 py-3 rounded-md font-bold hover:bg-brand-accent/90 transition-colors cursor-pointer w-full md:w-auto">
+        Créer mon premier devis
+      </button>
     </main>
   );
 }
