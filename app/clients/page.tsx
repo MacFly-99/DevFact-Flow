@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma";
-import Link from "next/link";
+import { ClientModal } from "./client-modal";
 
 export default async function ClientsPage() {
-  // On récupère les clients depuis la base de données (Server Component)
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -11,12 +10,9 @@ export default async function ClientsPage() {
     <div className="p-8 max-w-5xl mx-auto w-full">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Mes Clients</h1>
-        <Link 
-          href="/clients/new" 
-          className="bg-brand-accent text-brand-night px-4 py-2 rounded-md font-bold hover:bg-brand-accent/90 transition-colors"
-        >
-          + Nouveau Client
-        </Link>
+        
+        <ClientModal />
+        
       </div>
 
       {clients.length === 0 ? (
