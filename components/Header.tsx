@@ -108,7 +108,10 @@ export function Header() {
                     </div>
                   </DropdownMenuLabel>
                   
-                  <DropdownMenuItem className="cursor-pointer focus:bg-white/10 mt-1">
+                  <DropdownMenuItem 
+                    render={<Link href="/profile" />} 
+                    className="cursor-pointer focus:bg-white/10 mt-1"
+                  >
                     <User className="mr-2 h-4 w-4" />
                     <span>Mon profil</span>
                   </DropdownMenuItem>

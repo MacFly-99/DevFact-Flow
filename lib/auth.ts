@@ -17,7 +17,15 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "USER",
-        input: false, // Empêche l'utilisateur de s'auto-promouvoir ADMIN à l'inscription
+        input: false,
+      },
+      companyName: {
+        type: "string",
+        required: false,
+      },
+      phone: {
+        type: "string",
+        required: false,
       },
     },
   },
