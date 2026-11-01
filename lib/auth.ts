@@ -11,6 +11,16 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
   },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "USER",
+        input: false, // Empêche l'utilisateur de s'auto-promouvoir ADMIN à l'inscription
+      },
+    },
+  },
   plugins: [
     nextCookies(),
   ],
