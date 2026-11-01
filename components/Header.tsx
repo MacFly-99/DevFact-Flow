@@ -37,6 +37,7 @@ export function Header() {
   const links = [
     { href: "/clients", label: "Clients" },
     { href: "/quotes", label: "Devis" },
+    { href: "/invoices", label: "Factures" },
   ];
 
   const getInitials = (name: string | null | undefined) => {
