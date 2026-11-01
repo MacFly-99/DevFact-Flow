@@ -38,6 +38,7 @@ export type QuoteMinAggregateOutputType = {
   id: string | null
   number: string | null
   status: $Enums.QuoteStatus | null
+  userId: string | null
   clientId: string | null
   total: number | null
   createdAt: Date | null
@@ -48,6 +49,7 @@ export type QuoteMaxAggregateOutputType = {
   id: string | null
   number: string | null
   status: $Enums.QuoteStatus | null
+  userId: string | null
   clientId: string | null
   total: number | null
   createdAt: Date | null
@@ -58,6 +60,7 @@ export type QuoteCountAggregateOutputType = {
   id: number
   number: number
   status: number
+  userId: number
   clientId: number
   total: number
   createdAt: number
@@ -78,6 +81,7 @@ export type QuoteMinAggregateInputType = {
   id?: true
   number?: true
   status?: true
+  userId?: true
   clientId?: true
   total?: true
   createdAt?: true
@@ -88,6 +92,7 @@ export type QuoteMaxAggregateInputType = {
   id?: true
   number?: true
   status?: true
+  userId?: true
   clientId?: true
   total?: true
   createdAt?: true
@@ -98,6 +103,7 @@ export type QuoteCountAggregateInputType = {
   id?: true
   number?: true
   status?: true
+  userId?: true
   clientId?: true
   total?: true
   createdAt?: true
@@ -195,6 +201,7 @@ export type QuoteGroupByOutputType = {
   id: string
   number: string
   status: $Enums.QuoteStatus
+  userId: string
   clientId: string
   total: number
   createdAt: Date
@@ -228,10 +235,12 @@ export type QuoteWhereInput = {
   id?: Prisma.StringFilter<"Quote"> | string
   number?: Prisma.StringFilter<"Quote"> | string
   status?: Prisma.EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
+  userId?: Prisma.StringFilter<"Quote"> | string
   clientId?: Prisma.StringFilter<"Quote"> | string
   total?: Prisma.FloatFilter<"Quote"> | number
   createdAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
   items?: Prisma.QuoteItemListRelationFilter
 }
@@ -240,10 +249,12 @@ export type QuoteOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
   total?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
   client?: Prisma.ClientOrderByWithRelationInput
   items?: Prisma.QuoteItemOrderByRelationAggregateInput
 }
@@ -255,10 +266,12 @@ export type QuoteWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.QuoteWhereInput[]
   NOT?: Prisma.QuoteWhereInput | Prisma.QuoteWhereInput[]
   status?: Prisma.EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
+  userId?: Prisma.StringFilter<"Quote"> | string
   clientId?: Prisma.StringFilter<"Quote"> | string
   total?: Prisma.FloatFilter<"Quote"> | number
   createdAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
   items?: Prisma.QuoteItemListRelationFilter
 }, "id" | "number">
@@ -267,6 +280,7 @@ export type QuoteOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
   total?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -285,6 +299,7 @@ export type QuoteScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Quote"> | string
   number?: Prisma.StringWithAggregatesFilter<"Quote"> | string
   status?: Prisma.EnumQuoteStatusWithAggregatesFilter<"Quote"> | $Enums.QuoteStatus
+  userId?: Prisma.StringWithAggregatesFilter<"Quote"> | string
   clientId?: Prisma.StringWithAggregatesFilter<"Quote"> | string
   total?: Prisma.FloatWithAggregatesFilter<"Quote"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Quote"> | Date | string
@@ -298,6 +313,7 @@ export type QuoteCreateInput = {
   total?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutQuotesInput
   client: Prisma.ClientCreateNestedOneWithoutQuotesInput
   items?: Prisma.QuoteItemCreateNestedManyWithoutQuoteInput
 }
@@ -306,6 +322,7 @@ export type QuoteUncheckedCreateInput = {
   id?: string
   number: string
   status?: $Enums.QuoteStatus
+  userId: string
   clientId: string
   total?: number
   createdAt?: Date | string
@@ -320,6 +337,7 @@ export type QuoteUpdateInput = {
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutQuotesNestedInput
   client?: Prisma.ClientUpdateOneRequiredWithoutQuotesNestedInput
   items?: Prisma.QuoteItemUpdateManyWithoutQuoteNestedInput
 }
@@ -328,6 +346,7 @@ export type QuoteUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   clientId?: Prisma.StringFieldUpdateOperationsInput | string
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -339,6 +358,7 @@ export type QuoteCreateManyInput = {
   id?: string
   number: string
   status?: $Enums.QuoteStatus
+  userId: string
   clientId: string
   total?: number
   createdAt?: Date | string
@@ -358,6 +378,7 @@ export type QuoteUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   clientId?: Prisma.StringFieldUpdateOperationsInput | string
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -378,6 +399,7 @@ export type QuoteCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
   total?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -392,6 +414,7 @@ export type QuoteMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
   total?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -402,6 +425,7 @@ export type QuoteMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   clientId?: Prisma.SortOrder
   total?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -415,6 +439,48 @@ export type QuoteSumOrderByAggregateInput = {
 export type QuoteScalarRelationFilter = {
   is?: Prisma.QuoteWhereInput
   isNot?: Prisma.QuoteWhereInput
+}
+
+export type QuoteCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.QuoteCreateWithoutUserInput, Prisma.QuoteUncheckedCreateWithoutUserInput> | Prisma.QuoteCreateWithoutUserInput[] | Prisma.QuoteUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.QuoteCreateOrConnectWithoutUserInput | Prisma.QuoteCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.QuoteCreateManyUserInputEnvelope
+  connect?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+}
+
+export type QuoteUncheckedCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.QuoteCreateWithoutUserInput, Prisma.QuoteUncheckedCreateWithoutUserInput> | Prisma.QuoteCreateWithoutUserInput[] | Prisma.QuoteUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.QuoteCreateOrConnectWithoutUserInput | Prisma.QuoteCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.QuoteCreateManyUserInputEnvelope
+  connect?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+}
+
+export type QuoteUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.QuoteCreateWithoutUserInput, Prisma.QuoteUncheckedCreateWithoutUserInput> | Prisma.QuoteCreateWithoutUserInput[] | Prisma.QuoteUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.QuoteCreateOrConnectWithoutUserInput | Prisma.QuoteCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.QuoteUpsertWithWhereUniqueWithoutUserInput | Prisma.QuoteUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.QuoteCreateManyUserInputEnvelope
+  set?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  disconnect?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  delete?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  connect?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  update?: Prisma.QuoteUpdateWithWhereUniqueWithoutUserInput | Prisma.QuoteUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.QuoteUpdateManyWithWhereWithoutUserInput | Prisma.QuoteUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.QuoteScalarWhereInput | Prisma.QuoteScalarWhereInput[]
+}
+
+export type QuoteUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.QuoteCreateWithoutUserInput, Prisma.QuoteUncheckedCreateWithoutUserInput> | Prisma.QuoteCreateWithoutUserInput[] | Prisma.QuoteUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.QuoteCreateOrConnectWithoutUserInput | Prisma.QuoteCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.QuoteUpsertWithWhereUniqueWithoutUserInput | Prisma.QuoteUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.QuoteCreateManyUserInputEnvelope
+  set?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  disconnect?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  delete?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  connect?: Prisma.QuoteWhereUniqueInput | Prisma.QuoteWhereUniqueInput[]
+  update?: Prisma.QuoteUpdateWithWhereUniqueWithoutUserInput | Prisma.QuoteUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.QuoteUpdateManyWithWhereWithoutUserInput | Prisma.QuoteUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.QuoteScalarWhereInput | Prisma.QuoteScalarWhereInput[]
 }
 
 export type QuoteCreateNestedManyWithoutClientInput = {
@@ -485,6 +551,68 @@ export type QuoteUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.QuoteUpdateToOneWithWhereWithoutItemsInput, Prisma.QuoteUpdateWithoutItemsInput>, Prisma.QuoteUncheckedUpdateWithoutItemsInput>
 }
 
+export type QuoteCreateWithoutUserInput = {
+  id?: string
+  number: string
+  status?: $Enums.QuoteStatus
+  total?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  client: Prisma.ClientCreateNestedOneWithoutQuotesInput
+  items?: Prisma.QuoteItemCreateNestedManyWithoutQuoteInput
+}
+
+export type QuoteUncheckedCreateWithoutUserInput = {
+  id?: string
+  number: string
+  status?: $Enums.QuoteStatus
+  clientId: string
+  total?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.QuoteItemUncheckedCreateNestedManyWithoutQuoteInput
+}
+
+export type QuoteCreateOrConnectWithoutUserInput = {
+  where: Prisma.QuoteWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuoteCreateWithoutUserInput, Prisma.QuoteUncheckedCreateWithoutUserInput>
+}
+
+export type QuoteCreateManyUserInputEnvelope = {
+  data: Prisma.QuoteCreateManyUserInput | Prisma.QuoteCreateManyUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type QuoteUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.QuoteWhereUniqueInput
+  update: Prisma.XOR<Prisma.QuoteUpdateWithoutUserInput, Prisma.QuoteUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.QuoteCreateWithoutUserInput, Prisma.QuoteUncheckedCreateWithoutUserInput>
+}
+
+export type QuoteUpdateWithWhereUniqueWithoutUserInput = {
+  where: Prisma.QuoteWhereUniqueInput
+  data: Prisma.XOR<Prisma.QuoteUpdateWithoutUserInput, Prisma.QuoteUncheckedUpdateWithoutUserInput>
+}
+
+export type QuoteUpdateManyWithWhereWithoutUserInput = {
+  where: Prisma.QuoteScalarWhereInput
+  data: Prisma.XOR<Prisma.QuoteUpdateManyMutationInput, Prisma.QuoteUncheckedUpdateManyWithoutUserInput>
+}
+
+export type QuoteScalarWhereInput = {
+  AND?: Prisma.QuoteScalarWhereInput | Prisma.QuoteScalarWhereInput[]
+  OR?: Prisma.QuoteScalarWhereInput[]
+  NOT?: Prisma.QuoteScalarWhereInput | Prisma.QuoteScalarWhereInput[]
+  id?: Prisma.StringFilter<"Quote"> | string
+  number?: Prisma.StringFilter<"Quote"> | string
+  status?: Prisma.EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
+  userId?: Prisma.StringFilter<"Quote"> | string
+  clientId?: Prisma.StringFilter<"Quote"> | string
+  total?: Prisma.FloatFilter<"Quote"> | number
+  createdAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
+}
+
 export type QuoteCreateWithoutClientInput = {
   id?: string
   number: string
@@ -492,6 +620,7 @@ export type QuoteCreateWithoutClientInput = {
   total?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutQuotesInput
   items?: Prisma.QuoteItemCreateNestedManyWithoutQuoteInput
 }
 
@@ -499,6 +628,7 @@ export type QuoteUncheckedCreateWithoutClientInput = {
   id?: string
   number: string
   status?: $Enums.QuoteStatus
+  userId: string
   total?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -531,19 +661,6 @@ export type QuoteUpdateManyWithWhereWithoutClientInput = {
   data: Prisma.XOR<Prisma.QuoteUpdateManyMutationInput, Prisma.QuoteUncheckedUpdateManyWithoutClientInput>
 }
 
-export type QuoteScalarWhereInput = {
-  AND?: Prisma.QuoteScalarWhereInput | Prisma.QuoteScalarWhereInput[]
-  OR?: Prisma.QuoteScalarWhereInput[]
-  NOT?: Prisma.QuoteScalarWhereInput | Prisma.QuoteScalarWhereInput[]
-  id?: Prisma.StringFilter<"Quote"> | string
-  number?: Prisma.StringFilter<"Quote"> | string
-  status?: Prisma.EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
-  clientId?: Prisma.StringFilter<"Quote"> | string
-  total?: Prisma.FloatFilter<"Quote"> | number
-  createdAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Quote"> | Date | string
-}
-
 export type QuoteCreateWithoutItemsInput = {
   id?: string
   number: string
@@ -551,6 +668,7 @@ export type QuoteCreateWithoutItemsInput = {
   total?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutQuotesInput
   client: Prisma.ClientCreateNestedOneWithoutQuotesInput
 }
 
@@ -558,6 +676,7 @@ export type QuoteUncheckedCreateWithoutItemsInput = {
   id?: string
   number: string
   status?: $Enums.QuoteStatus
+  userId: string
   clientId: string
   total?: number
   createdAt?: Date | string
@@ -587,10 +706,54 @@ export type QuoteUpdateWithoutItemsInput = {
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutQuotesNestedInput
   client?: Prisma.ClientUpdateOneRequiredWithoutQuotesNestedInput
 }
 
 export type QuoteUncheckedUpdateWithoutItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.StringFieldUpdateOperationsInput | string
+  total?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuoteCreateManyUserInput = {
+  id?: string
+  number: string
+  status?: $Enums.QuoteStatus
+  clientId: string
+  total?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type QuoteUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  total?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.ClientUpdateOneRequiredWithoutQuotesNestedInput
+  items?: Prisma.QuoteItemUpdateManyWithoutQuoteNestedInput
+}
+
+export type QuoteUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  clientId?: Prisma.StringFieldUpdateOperationsInput | string
+  total?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.QuoteItemUncheckedUpdateManyWithoutQuoteNestedInput
+}
+
+export type QuoteUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
@@ -604,6 +767,7 @@ export type QuoteCreateManyClientInput = {
   id?: string
   number: string
   status?: $Enums.QuoteStatus
+  userId: string
   total?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -616,6 +780,7 @@ export type QuoteUpdateWithoutClientInput = {
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutQuotesNestedInput
   items?: Prisma.QuoteItemUpdateManyWithoutQuoteNestedInput
 }
 
@@ -623,6 +788,7 @@ export type QuoteUncheckedUpdateWithoutClientInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -633,6 +799,7 @@ export type QuoteUncheckedUpdateManyWithoutClientInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   total?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -673,10 +840,12 @@ export type QuoteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   id?: boolean
   number?: boolean
   status?: boolean
+  userId?: boolean
   clientId?: boolean
   total?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Quote$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.QuoteCountOutputTypeDefaultArgs<ExtArgs>
@@ -686,10 +855,12 @@ export type QuoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   number?: boolean
   status?: boolean
+  userId?: boolean
   clientId?: boolean
   total?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["quote"]>
 
@@ -697,10 +868,12 @@ export type QuoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   number?: boolean
   status?: boolean
+  userId?: boolean
   clientId?: boolean
   total?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["quote"]>
 
@@ -708,28 +881,33 @@ export type QuoteSelectScalar = {
   id?: boolean
   number?: boolean
   status?: boolean
+  userId?: boolean
   clientId?: boolean
   total?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type QuoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "status" | "clientId" | "total" | "createdAt" | "updatedAt", ExtArgs["result"]["quote"]>
+export type QuoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "status" | "userId" | "clientId" | "total" | "createdAt" | "updatedAt", ExtArgs["result"]["quote"]>
 export type QuoteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Quote$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.QuoteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type QuoteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }
 export type QuoteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }
 
 export type $QuotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Quote"
   objects: {
+    user: Prisma.$UserPayload<ExtArgs>
     client: Prisma.$ClientPayload<ExtArgs>
     items: Prisma.$QuoteItemPayload<ExtArgs>[]
   }
@@ -737,6 +915,7 @@ export type $QuotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     id: string
     number: string
     status: $Enums.QuoteStatus
+    userId: string
     clientId: string
     total: number
     createdAt: Date
@@ -1135,6 +1314,7 @@ readonly fields: QuoteFieldRefs;
  */
 export interface Prisma__QuoteClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   client<T extends Prisma.ClientDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Quote$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quote$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuoteItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1169,6 +1349,7 @@ export interface QuoteFieldRefs {
   readonly id: Prisma.FieldRef<"Quote", 'String'>
   readonly number: Prisma.FieldRef<"Quote", 'String'>
   readonly status: Prisma.FieldRef<"Quote", 'QuoteStatus'>
+  readonly userId: Prisma.FieldRef<"Quote", 'String'>
   readonly clientId: Prisma.FieldRef<"Quote", 'String'>
   readonly total: Prisma.FieldRef<"Quote", 'Float'>
   readonly createdAt: Prisma.FieldRef<"Quote", 'DateTime'>

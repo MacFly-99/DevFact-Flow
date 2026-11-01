@@ -7,61 +7,148 @@ datasource db {
   provider = "postgresql"
 }
 
+// --- MODÈLES BETTER AUTH ---
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations avec tes données métier
+  clients Client[]
+  quotes  Quote[]
+
+  // Relations Better Auth
+  sessions Session[]
+  accounts Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// --- TES MODÈLES MÉTIER (liés à l'utilisateur) ---
+
 model Client {
-  id          String    @id @default(uuid())
+  id          String  @id @default(uuid())
   companyName String?
   name        String
-  email       String
+  email       String  @unique
   phone       String?
   address     String?
-  
-  quotes      Quote[]
-  invoices    Invoice[]
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  quotes   Quote[]
+  invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Quote {
-  id        String      @id @default(uuid())
-  number    String      @unique
-  status    QuoteStatus @default(DRAFT)
-  clientId  String
-  client    Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  items     QuoteItem[]
-  total     Float       @default(0)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id     String      @id @default(uuid())
+  number String      @unique
+  status QuoteStatus @default(DRAFT)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  items QuoteItem[]
+  total Float       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model QuoteItem {
-  id          String  @id @default(uuid())
+  id          String @id @default(uuid())
   description String
-  quantity    Int     @default(1)
+  quantity    Int    @default(1)
   unitPrice   Float
-  quoteId     String
-  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 }
 
 model Invoice {
-  id        String        @id @default(uuid())
-  number    String        @unique
-  status    InvoiceStatus @default(DRAFT)
-  clientId  String
-  client    Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  items     InvoiceItem[]
-  total     Float         @default(0)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id     String        @id @default(uuid())
+  number String        @unique
+  status InvoiceStatus @default(DRAFT)
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  items InvoiceItem[]
+  total Float         @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model InvoiceItem {
-  id          String  @id @default(uuid())
+  id          String @id @default(uuid())
   description String
-  quantity    Int     @default(1)
+  quantity    Int    @default(1)
   unitPrice   Float
-  invoiceId   String
-  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 enum QuoteStatus {

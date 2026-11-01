@@ -1,10 +1,17 @@
 import prisma from "@/lib/prisma";
 import { QuoteForm } from "./quote-form";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function NewQuotePage() {
-  // On récupère les clients pour les afficher dans le menu déroulant
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) redirect("/login");
+
+  // FILTRE PAR USER ID : On ne veut que les clients de cet utilisateur
   const clients = await prisma.client.findMany({
+    where: { userId: session.user.id },
     orderBy: { name: "asc" },
   });
 
@@ -24,7 +31,6 @@ export default async function NewQuotePage() {
           </Link>
         </div>
       ) : (
-        // On passe les clients au composant client
         <QuoteForm clients={clients} />
       )}
     </div>

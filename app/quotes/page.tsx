@@ -2,8 +2,10 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { QuoteStatus } from "../../src/generated/prisma/client";
 import { cn } from "@/lib/utils";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-// Fonction pour les couleurs
 function getStatusStyle(status: QuoteStatus) {
   switch (status) {
     case "ACCEPTED": return "bg-green-500/20 text-green-400 border-green-500/30";
@@ -14,7 +16,11 @@ function getStatusStyle(status: QuoteStatus) {
 }
 
 export default async function QuotesPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) redirect("/login");
+
   const quotes = await prisma.quote.findMany({
+    where: { userId: session.user.id }, // FILTRE PAR USER ID
     include: { client: true },
     orderBy: { createdAt: "desc" },
   });
@@ -38,40 +44,29 @@ export default async function QuotesPage() {
       ) : (
         <div className="grid gap-4">
           {quotes.map((quote) => (
-            /* Le Link est en "block" et enveloppe la div */
-            <Link 
-              href={`/quotes/${quote.id}`} 
-              key={quote.id} 
-              className="block"
-            >
-              {/* La div gère le design et le flex */}
-              <div className="bg-white/5 p-4 rounded-lg border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-200 group cursor-pointer">
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="font-mono text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded text-sm group-hover:bg-brand-accent/20 transition-colors">
-                      {quote.number}
-                    </span>
-                    <h3 className="font-bold text-lg text-text-main">
-                      {quote.client.companyName || quote.client.name}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-text-muted">
-                    Créé le {new Date(quote.createdAt).toLocaleDateString('fr-FR')}
-                  </p>
-                </div>
-                
-                {/* Le prix et le statut */}
-                <div className="text-left md:text-right w-full md:w-auto flex md:flex-col justify-between items-center md:items-end border-t md:border-t-0 border-white/10 pt-3 md:pt-0 mt-2 md:mt-0">
-                  <p className="font-bold text-lg">{quote.total.toFixed(2)} €</p>
-                  <span className={cn(
-                    "text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider border mt-1",
-                    getStatusStyle(quote.status)
-                  )}>
-                    {quote.status}
+            <Link href={`/quotes/${quote.id}`} key={quote.id} className="block bg-white/5 p-4 rounded-lg border border-white/10 flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-200 group">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <span className="font-mono text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded text-sm group-hover:bg-brand-accent/20 transition-colors">
+                    {quote.number}
                   </span>
+                  <h3 className="font-bold text-lg text-text-main">
+                    {quote.client.companyName || quote.client.name}
+                  </h3>
                 </div>
-
+                <p className="text-xs text-text-muted">
+                  Créé le {new Date(quote.createdAt).toLocaleDateString('fr-FR')}
+                </p>
+              </div>
+              
+              <div className="text-left md:text-right w-full md:w-auto flex md:block justify-between items-center border-t md:border-t-0 border-white/10 pt-3 md:pt-0 mt-2 md:mt-0">
+                <p className="font-bold text-lg">{quote.total.toFixed(2)} €</p>
+                <span className={cn(
+                  "inline-block text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider border mt-1",
+                  getStatusStyle(quote.status)
+                )}>
+                  {quote.status}
+                </span>
               </div>
             </Link>
           ))}
