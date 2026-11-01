@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft, Download, Send } from "lucide-react";
 import { notFound } from "next/navigation";
+import { StatusDropdown } from "./status-dropdown";
 
 export default async function QuoteDetailsPage({ 
   params 
@@ -10,7 +11,6 @@ export default async function QuoteDetailsPage({
 }) {
   const { id } = await params;
 
-  // On récupère le devis, son client et ses lignes
   const quote = await prisma.quote.findUnique({
     where: { id },
     include: {
@@ -19,7 +19,6 @@ export default async function QuoteDetailsPage({
     },
   });
 
-  // Si le devis n'existe pas, on affiche la page 404
   if (!quote) {
     notFound();
   }
@@ -58,9 +57,7 @@ export default async function QuoteDetailsPage({
           </div>
           
           <div className="text-left md:text-right">
-            <span className="inline-block px-3 py-1 bg-brand-accent/20 text-brand-accent rounded-full text-sm font-bold tracking-wider uppercase border border-brand-accent/30">
-              {quote.status}
-            </span>
+            <StatusDropdown quoteId={quote.id} currentStatus={quote.status} />
           </div>
         </div>
 
@@ -81,7 +78,6 @@ export default async function QuoteDetailsPage({
 
         {/* Tableau des prestations */}
         <div className="w-full mb-8">
-          {/* En-têtes */}
           <div className="hidden md:grid grid-cols-12 gap-4 border-b border-white/10 pb-3 mb-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
             <div className="col-span-6">Description</div>
             <div className="col-span-2 text-center">Qté</div>
@@ -89,7 +85,6 @@ export default async function QuoteDetailsPage({
             <div className="col-span-2 text-right">Total</div>
           </div>
 
-          {/* Lignes */}
           <div className="space-y-4">
             {quote.items.map((item) => (
               <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 border-b border-white/5 pb-4 md:pb-3 items-center">
@@ -117,7 +112,6 @@ export default async function QuoteDetailsPage({
               <span>Sous-total</span>
               <span>{quote.total.toFixed(2)} €</span>
             </div>
-            {/* On ajoutera la TVA plus tard */}
             <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2">
               <span>Total</span>
               <span className="text-brand-accent">{quote.total.toFixed(2)} €</span>

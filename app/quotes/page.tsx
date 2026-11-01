@@ -1,5 +1,17 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { QuoteStatus } from "../../src/generated/prisma/client";
+import { cn } from "@/lib/utils";
+
+// Fonction pour les couleurs
+function getStatusStyle(status: QuoteStatus) {
+  switch (status) {
+    case "ACCEPTED": return "bg-green-500/20 text-green-400 border-green-500/30";
+    case "REJECTED": return "bg-red-500/20 text-red-400 border-red-500/30";
+    case "SENT": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    default: return "bg-brand-accent/20 text-brand-accent border-brand-accent/30";
+  }
+}
 
 export default async function QuotesPage() {
   const quotes = await prisma.quote.findMany({
@@ -26,31 +38,40 @@ export default async function QuotesPage() {
       ) : (
         <div className="grid gap-4">
           {quotes.map((quote) => (
+            /* Le Link est en "block" et enveloppe la div */
             <Link 
               href={`/quotes/${quote.id}`} 
               key={quote.id} 
-              className="flex bg-white/5 p-4 rounded-lg border border-white/10 flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-200 group"
+              className="block"
             >
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="font-mono text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded text-sm group-hover:bg-brand-accent/20 transition-colors">
-                    {quote.number}
-                  </span>
-                  <h3 className="font-bold text-lg text-text-main">
-                    {/* On affiche l'entreprise si elle existe, sinon le nom du contact */}
-                    {quote.client.companyName || quote.client.name}
-                  </h3>
+              {/* La div gère le design et le flex */}
+              <div className="bg-white/5 p-4 rounded-lg border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-200 group cursor-pointer">
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="font-mono text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded text-sm group-hover:bg-brand-accent/20 transition-colors">
+                      {quote.number}
+                    </span>
+                    <h3 className="font-bold text-lg text-text-main">
+                      {quote.client.companyName || quote.client.name}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-text-muted">
+                    Créé le {new Date(quote.createdAt).toLocaleDateString('fr-FR')}
+                  </p>
                 </div>
-                <p className="text-xs text-text-muted">
-                  Créé le {new Date(quote.createdAt).toLocaleDateString('fr-FR')}
-                </p>
-              </div>
-              
-              <div className="text-left md:text-right w-full md:w-auto flex md:block justify-between items-center border-t md:border-t-0 border-white/10 pt-3 md:pt-0 mt-2 md:mt-0">
-                <p className="font-bold text-lg">{quote.total.toFixed(2)} €</p>
-                <span className="text-xs font-medium px-2 py-1 bg-white/10 rounded-full uppercase tracking-wider text-text-muted group-hover:text-brand-accent transition-colors">
-                  {quote.status}
-                </span>
+                
+                {/* Le prix et le statut */}
+                <div className="text-left md:text-right w-full md:w-auto flex md:flex-col justify-between items-center md:items-end border-t md:border-t-0 border-white/10 pt-3 md:pt-0 mt-2 md:mt-0">
+                  <p className="font-bold text-lg">{quote.total.toFixed(2)} €</p>
+                  <span className={cn(
+                    "text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider border mt-1",
+                    getStatusStyle(quote.status)
+                  )}>
+                    {quote.status}
+                  </span>
+                </div>
+
               </div>
             </Link>
           ))}
