@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
+import { useSession, signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -11,6 +13,13 @@ import {
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/"); 
+  };
 
   const links = [
     { href: "/clients", label: "Clients" },
@@ -21,45 +30,68 @@ export function Header() {
     <header className="w-full border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
         
-        {/* Logo */}
-        <Link href="/" className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity">
+        <Link href={session ? "/dashboard" : "/"} className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity">
           DevFact <span className="text-brand-accent">Flow</span>
         </Link>
 
-        {/* Navigation Desktop (Caché sur mobile) */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {links.map((link) => (
-            <Link 
-              key={link.href} 
-              href={link.href} 
-              className="text-text-muted hover:text-brand-accent transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Navigation Desktop */}
+        {session && (
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            {links.map((link) => (
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                className="text-text-muted hover:text-brand-accent transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+            
+            <div className="w-px h-6 bg-white/10 mx-1"></div>
 
-        {/* Menu Burger Mobile (Caché sur desktop) */}
-        <div className="md:hidden">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger render={<button className="p-2 text-text-muted hover:text-white transition-colors" />}>
-              <Menu className="h-6 w-6" />
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-brand-night border-white/10 text-text-main w-62.5">
-              <nav className="flex flex-col gap-6 mt-12">
-                {links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)} // Ferme le menu au clic
-                    className="text-lg font-medium text-text-muted hover:text-brand-accent transition-colors"
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-300 transition-all duration-200 py-2 px-4 rounded-md cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Déconnexion</span>
+            </button>
+          </nav>
+        )}
+
+        {/* Menu Mobile */}
+        <div className="md:hidden flex items-center gap-4">
+          {session && (
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger render={<button className="p-2 text-text-muted hover:text-white transition-colors cursor-pointer" />}>
+                <Menu className="h-6 w-6" />
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-brand-night border-white/10 text-text-main w-62.5">
+                <nav className="flex flex-col gap-4 mt-12">
+                  {links.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className="text-lg font-medium text-text-muted hover:text-brand-accent transition-colors px-2 py-2"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  
+                  <div className="h-px w-full bg-white/10 my-2"></div>
+                  
+                  <button 
+                    onClick={() => { setOpen(false); handleSignOut(); }}
+                    className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 p-3 rounded-md text-lg font-medium w-full text-left cursor-pointer"
                   >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                    <LogOut className="h-5 w-5" />
+                    Déconnexion
+                  </button>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
 
       </div>
