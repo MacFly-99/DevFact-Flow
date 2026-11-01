@@ -16,6 +16,8 @@ model User {
   emailVerified Boolean  @default(false)
   image         String?
   role          String    @default("USER")
+  companyName   String?
+  phone         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
