@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ArrowLeft, Download, Send } from "lucide-react";
+import { ArrowLeft, Download, Send, FileText } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { StatusDropdown } from "./status-dropdown";
 import { ConvertToInvoiceButton } from "./convert-button";
@@ -16,7 +16,7 @@ export default async function QuoteDetailsPage({
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/");
 
-  const quote = await prisma.quote.findUnique({
+  const quote = await prisma.quote.findFirst({
     where: { 
       id: id,
       userId: session.user.id 
@@ -24,6 +24,7 @@ export default async function QuoteDetailsPage({
     include: {
       client: true,
       items: true,
+      invoice: true,
     },
   });
 
@@ -33,17 +34,24 @@ export default async function QuoteDetailsPage({
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
-      
-      {/* Barre d'actions supérieure */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <Link href="/quotes" className="text-brand-accent hover:underline flex items-center gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Retour aux devis
         </Link>
         
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
-          {/* Bouton Convertir (uniquement si ACCEPTED) */}
           {quote.status === "ACCEPTED" && (
-             <ConvertToInvoiceButton quoteId={quote.id} />
+            quote.invoice ? (
+              <Link 
+                href={`/invoices/${quote.invoice.id}`}
+                className="flex items-center gap-2 bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30 px-4 py-2 rounded-md font-bold transition-colors shadow-lg shadow-green-500/10 cursor-pointer"
+              >
+                <FileText className="h-4 w-4" />
+                Voir la facture ({quote.invoice.number})
+              </Link>
+            ) : (
+              <ConvertToInvoiceButton quoteId={quote.id} />
+            )
           )}
 
           <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-md transition-colors text-sm font-medium">
@@ -55,10 +63,7 @@ export default async function QuoteDetailsPage({
         </div>
       </div>
 
-      {/* La feuille du devis */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 md:p-10 shadow-2xl">
-        
-        {/* En-tête du devis */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-8 mb-8 gap-6">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
@@ -68,13 +73,11 @@ export default async function QuoteDetailsPage({
               Émis le {new Date(quote.createdAt).toLocaleDateString('fr-FR')}
             </p>
           </div>
-          
           <div className="text-left md:text-right">
             <StatusDropdown quoteId={quote.id} currentStatus={quote.status} />
           </div>
         </div>
 
-        {/* Infos Client */}
         <div className="mb-10">
           <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Facturé à</p>
           <div className="text-text-main">
@@ -89,7 +92,6 @@ export default async function QuoteDetailsPage({
           </div>
         </div>
 
-        {/* Tableau des prestations */}
         <div className="w-full mb-8">
           <div className="hidden md:grid grid-cols-12 gap-4 border-b border-white/10 pb-3 mb-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
             <div className="col-span-6">Description</div>
@@ -118,7 +120,6 @@ export default async function QuoteDetailsPage({
           </div>
         </div>
 
-        {/* Total */}
         <div className="flex justify-end border-t border-white/10 pt-6">
           <div className="w-full md:w-1/2 flex flex-col gap-2">
             <div className="flex justify-between text-sm text-text-muted">
@@ -131,7 +132,6 @@ export default async function QuoteDetailsPage({
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

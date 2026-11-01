@@ -115,6 +115,7 @@ model Quote {
 
   items QuoteItem[]
   total Float       @default(0)
+  invoice   Invoice?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -137,6 +138,9 @@ model Invoice {
     
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  quoteId   String?     @unique 
+  quote     Quote?      @relation(fields: [quoteId], references: [id], onDelete: SetNull)
 
   clientId String
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
