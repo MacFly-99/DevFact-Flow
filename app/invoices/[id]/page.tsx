@@ -6,6 +6,7 @@ import { InvoiceStatusDropdown } from "./status-dropdown";
 import { PdfDownloadButton } from "@/components/pdf-download-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { SendDocumentButton } from "@/components/send-document-button";
 
 export default async function InvoiceDetailsPage({ 
   params 
@@ -44,9 +45,7 @@ export default async function InvoiceDetailsPage({
         <div className="flex gap-3 w-full md:w-auto">
           <PdfDownloadButton id={invoice.id} type="invoice" />
 
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-accent text-brand-night hover:bg-brand-accent/90 px-4 py-2 rounded-md transition-colors text-sm font-bold">
-            <Send className="h-4 w-4" /> Envoyer par email
-          </button>
+          <SendDocumentButton id={invoice.id} type="invoice" />
         </div>
       </div>
 

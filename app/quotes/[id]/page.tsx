@@ -7,6 +7,7 @@ import { ConvertToInvoiceButton } from "./convert-button";
 import { PdfDownloadButton } from "@/components/pdf-download-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { SendDocumentButton } from "@/components/send-document-button";
 
 export default async function QuoteDetailsPage({ 
   params 
@@ -57,9 +58,7 @@ export default async function QuoteDetailsPage({
 
           <PdfDownloadButton id={quote.id} type="quote" />
 
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-accent text-brand-night hover:bg-brand-accent/90 px-4 py-2 rounded-md transition-colors text-sm font-bold">
-            <Send className="h-4 w-4" /> Envoyer
-          </button>
+          <SendDocumentButton id={quote.id} type="quote" />
         </div>
       </div>
 
