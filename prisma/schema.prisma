@@ -115,6 +115,9 @@ model Quote {
 
   items QuoteItem[]
   total Float       @default(0)
+  taxRate   Float       @default(20.0)
+  taxAmount Float       @default(0.0)
+  totalTTC  Float       @default(0.0)
   invoice   Invoice?
 
   createdAt DateTime @default(now())
@@ -147,6 +150,9 @@ model Invoice {
 
   items InvoiceItem[]
   total Float         @default(0)
+  taxRate   Float       @default(20.0)
+  taxAmount Float       @default(0.0)
+  totalTTC  Float       @default(0.0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

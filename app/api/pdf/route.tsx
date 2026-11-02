@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get("id");
-    const type = searchParams.get("type"); // "quote" ou "invoice"
+    const type = searchParams.get("type");
 
     if (!id || !type) return new NextResponse("Paramètres manquants", { status: 400 });
 
@@ -35,6 +35,9 @@ export async function GET(req: NextRequest) {
         client: quote.client,
         items: quote.items,
         total: quote.total,
+        taxRate: quote.taxRate,
+        taxAmount: quote.taxAmount,
+        totalTTC: quote.totalTTC,
       };
       docTypeLabel = "DEVIS";
       fileName = `Devis-${quote.number}.pdf`;
@@ -56,17 +59,18 @@ export async function GET(req: NextRequest) {
         client: invoice.client,
         items: invoice.items,
         total: invoice.total,
+        taxRate: invoice.taxRate,
+        taxAmount: invoice.taxAmount,
+        totalTTC: invoice.totalTTC,
       };
       docTypeLabel = "FACTURE";
       fileName = `Facture-${invoice.number}.pdf`;
     }
 
-    // Génération du flux PDF
     const stream = await renderToStream(
       <PdfDocument type={docTypeLabel} {...documentData} />
     );
 
-    // Conversion du stream en Buffer
     const chunks: Uint8Array[] = [];
     for await (const chunk of stream) {
       chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);

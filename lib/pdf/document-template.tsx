@@ -1,7 +1,6 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
-// On définit les styles (c'est du CSS-in-JS, mais version PDF)
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", color: "#333" },
   header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 40 },
@@ -42,9 +41,12 @@ type PdfDocumentProps = {
   };
   items: Array<{ description: string; quantity: number; unitPrice: number }>;
   total: number;
+  taxRate: number;
+  taxAmount: number;
+  totalTTC: number;
 };
 
-export function PdfDocument({ type, number, date, dueDate, status, client, items, total }: PdfDocumentProps) {
+export function PdfDocument({ type, number, date, dueDate, status, client, items, total, taxRate, taxAmount, totalTTC }: PdfDocumentProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -103,12 +105,16 @@ export function PdfDocument({ type, number, date, dueDate, status, client, items
         <View style={styles.totalsSection}>
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
-              <Text>Sous-total</Text>
+              <Text>Total HT</Text>
               <Text>{total.toFixed(2)} €</Text>
             </View>
+            <View style={styles.totalRow}>
+              <Text>TVA ({taxRate}%)</Text>
+              <Text>{taxAmount.toFixed(2)} €</Text>
+            </View>
             <View style={styles.grandTotalRow}>
-              <Text style={styles.grandTotalText}>Total</Text>
-              <Text style={styles.grandTotalText}>{total.toFixed(2)} €</Text>
+              <Text style={styles.grandTotalText}>Total TTC</Text>
+              <Text style={styles.grandTotalText}>{totalTTC.toFixed(2)} €</Text>
             </View>
           </View>
         </View>
