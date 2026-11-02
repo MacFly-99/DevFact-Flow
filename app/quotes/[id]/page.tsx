@@ -120,15 +120,20 @@ export default async function QuoteDetailsPage({
           </div>
         </div>
 
+        {/* Total avec TVA */}
         <div className="flex justify-end border-t border-white/10 pt-6">
           <div className="w-full md:w-1/2 flex flex-col gap-2">
             <div className="flex justify-between text-sm text-text-muted">
-              <span>Sous-total</span>
+              <span>Total HT</span>
               <span>{quote.total.toFixed(2)} €</span>
             </div>
+            <div className="flex justify-between text-sm text-text-muted">
+              <span>TVA ({quote.taxRate}%)</span>
+              <span>{quote.taxAmount.toFixed(2)} €</span>
+            </div>
             <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2">
-              <span>Total</span>
-              <span className="text-brand-accent">{quote.total.toFixed(2)} €</span>
+              <span>Total TTC</span>
+              <span className="text-brand-accent">{quote.totalTTC.toFixed(2)} €</span>
             </div>
           </div>
         </div>

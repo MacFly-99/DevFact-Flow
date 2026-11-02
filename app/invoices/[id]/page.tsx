@@ -42,7 +42,6 @@ export default async function InvoiceDetailsPage({
         </Link>
         
         <div className="flex gap-3 w-full md:w-auto">
-          
           <PdfDownloadButton id={invoice.id} type="invoice" />
 
           <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-accent text-brand-night hover:bg-brand-accent/90 px-4 py-2 rounded-md transition-colors text-sm font-bold">
@@ -111,16 +110,21 @@ export default async function InvoiceDetailsPage({
           </div>
         </div>
 
+        {/* Total avec TVA */}
         <div className="flex justify-end border-t border-white/10 pt-6">
           <div className="w-full md:w-1/2 flex flex-col gap-2">
             <div className="flex justify-between text-sm text-text-muted">
-              <span>Sous-total</span>
+              <span>Total HT</span>
               <span>{invoice.total.toFixed(2)} €</span>
+            </div>
+            <div className="flex justify-between text-sm text-text-muted">
+              <span>TVA ({invoice.taxRate}%)</span>
+              <span>{invoice.taxAmount.toFixed(2)} €</span>
             </div>
             <p className="text-xs text-text-muted mt-2">Payable sous 30 jours.</p>
             <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2">
-              <span>Total à payer</span>
-              <span className="text-brand-accent">{invoice.total.toFixed(2)} €</span>
+              <span>Total TTC</span>
+              <span className="text-brand-accent">{invoice.totalTTC.toFixed(2)} €</span>
             </div>
           </div>
         </div>

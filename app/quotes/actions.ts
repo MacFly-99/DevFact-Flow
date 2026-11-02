@@ -13,15 +13,21 @@ export async function createQuote(formData: FormData) {
 
   const clientId = formData.get("clientId") as string;
   const itemsJson = formData.get("items") as string;
+  const taxRate = Number(formData.get("taxRate"));
   const items = JSON.parse(itemsJson);
 
   if (!clientId || items.length === 0) {
     throw new Error("Données invalides");
   }
 
-  const total = items.reduce((acc: number, item: any) => {
+  // Calcul du Total HT
+  const totalHT = items.reduce((acc: number, item: any) => {
     return acc + (Number(item.quantity) * Number(item.unitPrice));
   }, 0);
+
+  // Calcul de la TVA et du TTC
+  const taxAmount = totalHT * (taxRate / 100);
+  const totalTTC = totalHT + taxAmount;
 
   const count = await prisma.quote.count({ where: { userId: session.user.id } });
   const year = new Date().getFullYear();
@@ -31,7 +37,10 @@ export async function createQuote(formData: FormData) {
     data: {
       number: quoteNumber,
       clientId: clientId,
-      total: total,
+      total: totalHT,
+      taxRate: taxRate,
+      taxAmount: taxAmount,
+      totalTTC: totalTTC,
       userId: session.user.id,
       items: {
         create: items.map((item: any) => ({
@@ -93,7 +102,10 @@ export async function convertToInvoice(quoteId: string) {
     data: {
       number: invoiceNumber,
       clientId: quote.clientId,
-      total: quote.total,
+      total: quote.total,          //  Copie le HT
+      taxRate: quote.taxRate,      //  Copie le taux
+      taxAmount: quote.taxAmount,  //  Copie la TVA
+      totalTTC: quote.totalTTC,    //  Copie le TTC
       userId: session.user.id,
       quoteId: quote.id,
       items: {

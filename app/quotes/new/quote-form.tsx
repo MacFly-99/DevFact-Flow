@@ -18,6 +18,7 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
   const [items, setItems] = useState<Item[]>([
     { description: "", quantity: 1, unitPrice: 0 },
   ]);
+  const [taxRate, setTaxRate] = useState<number>(20); // État pour la TVA
 
   const addItem = () => {
     setItems([...items, { description: "", quantity: 1, unitPrice: 0 }]);
@@ -35,12 +36,16 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
     setItems(newItems);
   };
 
-  const total = items.reduce((acc, item) => {
+  // Calculs en temps réel
+  const totalHT = items.reduce((acc, item) => {
     return acc + (Number(item.quantity) * Number(item.unitPrice));
   }, 0);
+  const taxAmount = totalHT * (taxRate / 100);
+  const totalTTC = totalHT + taxAmount;
 
   async function onSubmit(formData: FormData) {
     formData.append("items", JSON.stringify(items));
+    formData.append("taxRate", taxRate.toString()); // On envoie la TVA
     await createQuote(formData);
   }
 
@@ -52,7 +57,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
         <label htmlFor="clientId" className="block text-sm font-medium mb-2 text-text-main">
           Client *
         </label>
-        
         <Select 
           name="clientId" 
           required
@@ -61,7 +65,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
           <SelectTrigger className="w-full bg-black/50 border-white/20 text-white focus:ring-brand-accent h-11 transition-colors hover:border-white/40">
             <SelectValue placeholder="Sélectionnez un client..." />
           </SelectTrigger>
-          
           <SelectContent 
             alignItemWithTrigger={false}
             side="bottom"
@@ -79,12 +82,10 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
             ))}
           </SelectContent>
         </Select>
-        
       </div>
 
       {/* LIGNES D'ARTICLES */}
       <div className="space-y-2">
-        
         <div className="flex justify-between items-center border-b border-white/10 pb-2 mb-4">
           <h3 className="text-lg font-bold">Détail des prestations</h3>
           <button
@@ -96,7 +97,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
           </button>
         </div>
 
-        {/* En-têtes des colonnes (Alignement corrigé) */}
         <div className="hidden md:grid grid-cols-12 gap-3 mb-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
           <div className="col-span-5 text-left">Description</div>
           <div className="col-span-2 text-center">Quantité</div>
@@ -106,8 +106,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
 
         {items.map((item, index) => (
           <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-black/20 p-3 rounded-lg border border-white/5">
-            
-            {/* Description */}
             <div className="col-span-1 md:col-span-5 w-full">
               <label className="md:hidden text-xs text-text-muted mb-1 block">Description</label>
               <input
@@ -120,7 +118,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
               />
             </div>
             
-            {/* Quantité (centré) */}
             <div className="col-span-1 md:col-span-2 w-full">
               <label className="md:hidden text-xs text-text-muted mb-1 block">Quantité</label>
               <input
@@ -134,7 +131,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
               />
             </div>
 
-            {/* Prix Unitaire (Aligné à droite) */}
             <div className="col-span-1 md:col-span-3 w-full relative">
               <label className="md:hidden text-xs text-text-muted mb-1 block">Prix Unitaire</label>
               <input
@@ -150,7 +146,6 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
               <span className="absolute right-3 top-9.5 md:top-1/2 md:-translate-y-1/2 text-text-muted text-sm">€</span>
             </div>
 
-            {/* Total ligne et bouton supprimer */}
             <div className="col-span-1 md:col-span-2 flex justify-between md:justify-end items-center gap-4 mt-2 md:mt-0 pr-2">
               <span className="md:hidden text-xs text-text-muted">Total :</span>
               <div className="text-right font-mono text-sm text-brand-accent font-bold">
@@ -165,17 +160,55 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
-
           </div>
         ))}
       </div>
 
-      {/* TOTAL GÉNÉRAL ET SOUMISSION */}
-      <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="text-xl font-bold">
-          Total du devis : <span className="text-brand-accent font-mono text-2xl">{total.toFixed(2)} €</span>
-        </div>
+      {/* SECTION TOTAUX AVEC TVA */}
+      <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         
+        {/* Sélecteur de TVA */}
+        <div className="w-full md:w-64">
+          <label className="block text-sm font-medium mb-2 text-text-muted">Taux de TVA</label>
+          <Select 
+            value={taxRate.toString()} 
+            onValueChange={(val) => setTaxRate(Number(val))}
+          >
+            <SelectTrigger className="w-full bg-black/50 border-white/20 text-white focus:ring-brand-accent h-10">
+              <SelectValue placeholder="Taux de TVA" />
+            </SelectTrigger>
+            <SelectContent 
+              alignItemWithTrigger={false}
+              side="bottom"
+              className="bg-[#151c2e] border-white/10 text-text-main"
+            >
+              <SelectItem value="0">0 % (Exonéré)</SelectItem>
+              <SelectItem value="5.5">5.5 %</SelectItem>
+              <SelectItem value="10">10 %</SelectItem>
+              <SelectItem value="20">20 % (Standard)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Affichage des calculs */}
+        <div className="w-full md:w-auto flex flex-col gap-2 bg-black/20 p-4 rounded-lg border border-white/5 min-w-62.5">
+          <div className="flex justify-between text-sm text-text-muted">
+            <span>Total HT</span>
+            <span className="font-mono text-white">{totalHT.toFixed(2)} €</span>
+          </div>
+          <div className="flex justify-between text-sm text-text-muted">
+            <span>TVA ({taxRate}%)</span>
+            <span className="font-mono text-white">{taxAmount.toFixed(2)} €</span>
+          </div>
+          <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-white/10 mt-1">
+            <span>Total TTC</span>
+            <span className="text-brand-accent font-mono">{totalTTC.toFixed(2)} €</span>
+          </div>
+        </div>
+      </div>
+
+      {/* BOUTON SOUMETTRE */}
+      <div className="flex justify-end pt-4">
         <button
           type="submit"
           className="w-full md:w-auto bg-brand-accent text-brand-night px-8 py-3 rounded-md font-bold hover:bg-brand-accent/90 transition-colors cursor-pointer"

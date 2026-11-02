@@ -161,6 +161,9 @@ export const QuoteScalarFieldEnum = {
   userId: 'userId',
   clientId: 'clientId',
   total: 'total',
+  taxRate: 'taxRate',
+  taxAmount: 'taxAmount',
+  totalTTC: 'totalTTC',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -187,6 +190,9 @@ export const InvoiceScalarFieldEnum = {
   quoteId: 'quoteId',
   clientId: 'clientId',
   total: 'total',
+  taxRate: 'taxRate',
+  taxAmount: 'taxAmount',
+  totalTTC: 'totalTTC',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
