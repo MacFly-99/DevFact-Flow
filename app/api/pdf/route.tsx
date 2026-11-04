@@ -17,6 +17,22 @@ export async function GET(req: NextRequest) {
 
     if (!id || !type) return new NextResponse("Paramètres manquants", { status: 400 });
 
+    // On récupère les infos de l'utilisateur pour l'émetteur
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!user) return new NextResponse("Utilisateur introuvable", { status: 404 });
+
+    const issuer = {
+      companyName: user.companyName,
+      companyAddress: user.companyAddress,
+      companySiret: user.companySiret,
+      companyVat: user.companyVat,
+      phone: user.phone,
+      email: user.email,
+    };
+
     let documentData;
     let docTypeLabel: "DEVIS" | "FACTURE" = "DEVIS";
     let fileName = "";
@@ -68,7 +84,7 @@ export async function GET(req: NextRequest) {
     }
 
     const stream = await renderToStream(
-      <PdfDocument type={docTypeLabel} {...documentData} />
+      <PdfDocument type={docTypeLabel} {...documentData} issuer={issuer} />
     );
 
     const chunks: Uint8Array[] = [];

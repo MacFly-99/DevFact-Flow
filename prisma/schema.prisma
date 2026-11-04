@@ -16,12 +16,20 @@ model User {
   emailVerified Boolean  @default(false)
   image         String?
   role          String    @default("USER")
+  
+  // Infos entreprise (si existantes)
   companyName   String?
   phone         String?
+
+  // Infos pour la facturation
+  companyAddress String?
+  companySiret   String?
+  companyVat     String?
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // Relations avec tes données métier
+  // Relations avec les données métier
   clients       Client[]
   quotes        Quote[]
   invoices      Invoice[]

@@ -27,6 +27,18 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      companyAddress: { 
+        type: "string",
+        required: false 
+      },
+      companySiret: { 
+        type: "string",
+        required: false 
+      },
+      companyVat: { 
+        type: "string", 
+        required: false 
+      },
     },
   },
   plugins: [
