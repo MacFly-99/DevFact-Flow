@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { updateProfile } from "./actions";
+import { toast } from "sonner";
 import { User as UserIcon, Building2, Phone, Pencil, X } from "lucide-react";
 
 type UserData = {
@@ -14,22 +15,23 @@ type UserData = {
 export function PersonalInfo({ user }: { user: UserData }) {
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fonction pour soumettre le formulaire et repasser en mode lecture
   async function handleSubmit(formData: FormData) {
-    await updateProfile(formData);
-    setIsEditing(false); 
+    try {
+      await updateProfile(formData);
+      toast.success("Profil mis à jour !", { description: "Vos informations personnelles ont été sauvegardées." });
+      setIsEditing(false); 
+    } catch (error) {
+      toast.error("Erreur", { description: "Impossible de mettre à jour le profil." });
+    }
   }
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 h-full">
-      
-      {/* En-tête du bloc */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold flex items-center gap-2">
           <UserIcon className="h-5 w-5 text-brand-accent" /> Informations personnelles
         </h3>
         
-        {/* Bouton Modifier / Annuler */}
         {!isEditing ? (
           <button 
             onClick={() => setIsEditing(true)}
@@ -47,7 +49,6 @@ export function PersonalInfo({ user }: { user: UserData }) {
         )}
       </div>
 
-      {/* MODE LECTURE */}
       {!isEditing && (
         <div className="space-y-6">
           <div>
@@ -75,7 +76,6 @@ export function PersonalInfo({ user }: { user: UserData }) {
         </div>
       )}
 
-      {/* MODE ÉDITION */}
       {isEditing && (
         <form action={handleSubmit} className="space-y-4">
           <div>

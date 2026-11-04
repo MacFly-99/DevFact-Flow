@@ -26,9 +26,9 @@ export async function updateCompanySettings(formData: FormData) {
     },
   });
 
-  // On rafraîchit la page des paramètres
   revalidatePath("/settings");
-  // On rafraîchit aussi les pages qui affichent le PDF (car les données ont changé)
   revalidatePath("/quotes");
   revalidatePath("/invoices");
+
+  return { success: true };
 }

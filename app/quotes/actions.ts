@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { QuoteStatus } from "../../src/generated/prisma/client";
 
+// 1. Création d'un devis
 export async function createQuote(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
@@ -53,9 +54,11 @@ export async function createQuote(formData: FormData) {
   });
 
   revalidatePath("/quotes");
-  redirect("/quotes");
+  
+  return { success: true };
 }
 
+// 2. Changement de statut d'un devis
 export async function updateQuoteStatus(quoteId: string, newStatus: QuoteStatus) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
@@ -74,10 +77,12 @@ export async function updateQuoteStatus(quoteId: string, newStatus: QuoteStatus)
   revalidatePath("/quotes");
 }
 
+// 3. Conversion d'un devis en facture
 export async function convertToInvoice(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
+  // Vérifier si une facture existe déjà pour ce devis
   const existingInvoice = await prisma.invoice.findUnique({
     where: { quoteId: quoteId },
   });
@@ -102,10 +107,10 @@ export async function convertToInvoice(quoteId: string) {
     data: {
       number: invoiceNumber,
       clientId: quote.clientId,
-      total: quote.total,          //  Copie le HT
-      taxRate: quote.taxRate,      //  Copie le taux
-      taxAmount: quote.taxAmount,  //  Copie la TVA
-      totalTTC: quote.totalTTC,    //  Copie le TTC
+      total: quote.total,          // On copie le HT
+      taxRate: quote.taxRate,      // On copie le taux
+      taxAmount: quote.taxAmount,  // On copie la TVA
+      totalTTC: quote.totalTTC,    // On copie le TTC
       userId: session.user.id,
       quoteId: quote.id,
       items: {

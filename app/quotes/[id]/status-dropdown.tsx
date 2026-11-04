@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { updateQuoteStatus } from "../actions";
 import { QuoteStatus } from "../../../src/generated/prisma/client";
 import { ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,14 +30,18 @@ export function StatusDropdown({ quoteId, currentStatus }: { quoteId: string, cu
 
   const handleStatusChange = (newStatus: QuoteStatus) => {
     setOpen(false);
-    startTransition(() => {
-      updateQuoteStatus(quoteId, newStatus);
+    startTransition(async () => {
+      try {
+        await updateQuoteStatus(quoteId, newStatus);
+        toast.success("Statut mis à jour", { description: `Le devis est maintenant au statut ${newStatus}.` });
+      } catch (error) {
+        toast.error("Erreur", { description: "Impossible de mettre à jour le statut." });
+      }
     });
   };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      {/* Correction ici : on utilise render au lieu de asChild */}
       <DropdownMenuTrigger 
         render={
           <button 
