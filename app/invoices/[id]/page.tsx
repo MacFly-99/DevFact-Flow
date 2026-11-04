@@ -1,12 +1,13 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { InvoiceStatusDropdown } from "./status-dropdown";
+import { DeleteInvoiceButton } from "./delete-button"; // 👈 Import
 import { PdfDownloadButton } from "@/components/pdf-download-button";
+import { SendDocumentButton } from "@/components/send-document-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { SendDocumentButton } from "@/components/send-document-button";
 
 export default async function InvoiceDetailsPage({ 
   params 
@@ -42,7 +43,13 @@ export default async function InvoiceDetailsPage({
           <ArrowLeft className="h-4 w-4" /> Retour aux factures
         </Link>
         
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto items-center justify-end">
+          
+          {/* Bouton de suppression (uniquement si pas payée) */}
+          {invoice.status !== "PAID" && (
+            <DeleteInvoiceButton invoiceId={invoice.id} />
+          )}
+
           <PdfDownloadButton id={invoice.id} type="invoice" />
 
           <SendDocumentButton id={invoice.id} type="invoice" />

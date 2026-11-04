@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateInvoiceStatus } from "../actions";
 import { InvoiceStatus } from "../../../src/generated/prisma/client";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Lock } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -16,6 +16,9 @@ import { cn } from "@/lib/utils";
 export function InvoiceStatusDropdown({ invoiceId, currentStatus }: { invoiceId: string, currentStatus: InvoiceStatus }) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+
+  // La logique de verrouillage
+  const isLocked = currentStatus === "PAID";
 
   const statuses: InvoiceStatus[] = ["DRAFT", "SENT", "PAID", "OVERDUE"];
 
@@ -33,22 +36,36 @@ export function InvoiceStatusDropdown({ invoiceId, currentStatus }: { invoiceId:
       case "PAID": return "Payée";
       case "OVERDUE": return "En retard";
       case "SENT": return "Envoyée";
-      default: return "Brouillon";
+      default: return "Draft";
     }
   };
 
   const handleStatusChange = (newStatus: InvoiceStatus) => {
+    if (isLocked) return; // Sécurité côté client
     setOpen(false);
     startTransition(async () => {
       try {
         await updateInvoiceStatus(invoiceId, newStatus);
         toast.success("Statut mis à jour", { description: `La facture est maintenant au statut ${getStatusLabel(newStatus)}.` });
-      } catch (error) {
-        toast.error("Erreur", { description: "Impossible de mettre à jour le statut." });
+      } catch (error: any) {
+        toast.error("Erreur", { description: error.message || "Impossible de mettre à jour le statut." });
       }
     });
   };
 
+  // Si c'est verrouillé, on affiche juste un badge statique avec un cadenas
+  if (isLocked) {
+    return (
+      <div className={cn(
+        "inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold tracking-wider uppercase border",
+        getStatusColor(currentStatus)
+      )}>
+        <Lock className="h-3 w-3" /> {getStatusLabel(currentStatus)}
+      </div>
+    );
+  }
+
+  // Sinon, on affiche le menu déroulant normal
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger 

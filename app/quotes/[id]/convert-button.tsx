@@ -1,18 +1,27 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { convertToInvoice } from "../actions";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function ConvertToInvoiceButton({ quoteId }: { quoteId: string }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleConvert = () => {
     startTransition(async () => {
       try {
-        await convertToInvoice(quoteId);
-        toast.success("Facture générée !", { description: "Le devis a bien été converti en facture." });
+        const result = await convertToInvoice(quoteId);
+        
+        toast.success(result.message || "Facture générée !", { 
+          description: "Le devis a bien été converti." 
+        });
+        
+        router.push(`/invoices/${result.invoiceId}`);
+        router.refresh();
+
       } catch (error: any) {
         toast.error("Erreur", { description: error.message || "Impossible de convertir le devis." });
       }

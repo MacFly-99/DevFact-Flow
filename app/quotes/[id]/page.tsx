@@ -4,10 +4,11 @@ import { ArrowLeft, Send, FileText } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { StatusDropdown } from "./status-dropdown";
 import { ConvertToInvoiceButton } from "./convert-button";
+import { DeleteQuoteButton } from "./delete-button"; // 👈 Import
 import { PdfDownloadButton } from "@/components/pdf-download-button";
+import { SendDocumentButton } from "@/components/send-document-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { SendDocumentButton } from "@/components/send-document-button";
 
 export default async function QuoteDetailsPage({ 
   params 
@@ -19,20 +20,11 @@ export default async function QuoteDetailsPage({
   if (!session?.user?.id) redirect("/");
 
   const quote = await prisma.quote.findFirst({
-    where: { 
-      id: id,
-      userId: session.user.id 
-    },
-    include: {
-      client: true,
-      items: true,
-      invoice: true,
-    },
+    where: { id: id, userId: session.user.id },
+    include: { client: true, items: true, invoice: true },
   });
 
-  if (!quote) {
-    notFound();
-  }
+  if (!quote) notFound();
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
@@ -41,7 +33,13 @@ export default async function QuoteDetailsPage({
           <ArrowLeft className="h-4 w-4" /> Retour aux devis
         </Link>
         
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto items-center">
+          
+          {/* Bouton de suppression (si pas accepté) */}
+          {quote.status !== "ACCEPTED" && (
+            <DeleteQuoteButton quoteId={quote.id} />
+          )}
+
           {quote.status === "ACCEPTED" && (
             quote.invoice ? (
               <Link 
@@ -57,7 +55,6 @@ export default async function QuoteDetailsPage({
           )}
 
           <PdfDownloadButton id={quote.id} type="quote" />
-
           <SendDocumentButton id={quote.id} type="quote" />
         </div>
       </div>
@@ -102,38 +99,20 @@ export default async function QuoteDetailsPage({
           <div className="space-y-4">
             {quote.items.map((item) => (
               <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 border-b border-white/5 pb-4 md:pb-3 items-center">
-                <div className="col-span-1 md:col-span-6 font-medium text-white">
-                  {item.description}
-                </div>
-                <div className="col-span-1 md:col-span-2 text-left md:text-center text-sm text-text-muted">
-                  <span className="md:hidden font-semibold">Qté : </span>{item.quantity}
-                </div>
-                <div className="col-span-1 md:col-span-2 text-left md:text-right text-sm text-text-muted">
-                  <span className="md:hidden font-semibold">P.U. : </span>{item.unitPrice.toFixed(2)} €
-                </div>
-                <div className="col-span-1 md:col-span-2 text-left md:text-right font-mono font-bold text-white mt-1 md:mt-0">
-                  {(item.quantity * item.unitPrice).toFixed(2)} €
-                </div>
+                <div className="col-span-1 md:col-span-6 font-medium text-white">{item.description}</div>
+                <div className="col-span-1 md:col-span-2 text-left md:text-center text-sm text-text-muted"><span className="md:hidden font-semibold">Qté : </span>{item.quantity}</div>
+                <div className="col-span-1 md:col-span-2 text-left md:text-right text-sm text-text-muted"><span className="md:hidden font-semibold">P.U. : </span>{item.unitPrice.toFixed(2)} €</div>
+                <div className="col-span-1 md:col-span-2 text-left md:text-right font-mono font-bold text-white mt-1 md:mt-0">{(item.quantity * item.unitPrice).toFixed(2)} €</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Total avec TVA */}
         <div className="flex justify-end border-t border-white/10 pt-6">
           <div className="w-full md:w-1/2 flex flex-col gap-2">
-            <div className="flex justify-between text-sm text-text-muted">
-              <span>Total HT</span>
-              <span>{quote.total.toFixed(2)} €</span>
-            </div>
-            <div className="flex justify-between text-sm text-text-muted">
-              <span>TVA ({quote.taxRate}%)</span>
-              <span>{quote.taxAmount.toFixed(2)} €</span>
-            </div>
-            <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2">
-              <span>Total TTC</span>
-              <span className="text-brand-accent">{quote.totalTTC.toFixed(2)} €</span>
-            </div>
+            <div className="flex justify-between text-sm text-text-muted"><span>Total HT</span><span>{quote.total.toFixed(2)} €</span></div>
+            <div className="flex justify-between text-sm text-text-muted"><span>TVA ({quote.taxRate}%)</span><span>{quote.taxAmount.toFixed(2)} €</span></div>
+            <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2"><span>Total TTC</span><span className="text-brand-accent">{quote.totalTTC.toFixed(2)} €</span></div>
           </div>
         </div>
       </div>
