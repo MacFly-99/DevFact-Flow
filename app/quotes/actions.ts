@@ -4,26 +4,24 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { QuoteStatus } from "../../src/generated/prisma/client";
+import { CreateQuoteSchema, QuoteStatusSchema, IdSchema } from "@/lib/validations";
 
-// 1. Création d'un devis
 export async function createQuote(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
-  const clientId = formData.get("clientId") as string;
-  const itemsJson = formData.get("items") as string;
-  const taxRate = Number(formData.get("taxRate"));
-  const items = JSON.parse(itemsJson);
+  const rawData = {
+    clientId: formData.get("clientId"),
+    taxRate: Number(formData.get("taxRate")),
+    items: JSON.parse(formData.get("items") as string),
+  };
 
-  if (!clientId || items.length === 0) {
-    throw new Error("Données invalides");
-  }
+  const validatedFields = CreateQuoteSchema.safeParse(rawData);
+  if (!validatedFields.success) throw new Error(validatedFields.error.issues[0].message);
 
-  const totalHT = items.reduce((acc: number, item: any) => {
-    return acc + (Number(item.quantity) * Number(item.unitPrice));
-  }, 0);
+  const { clientId, taxRate, items } = validatedFields.data;
 
+  const totalHT = items.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
   const taxAmount = totalHT * (taxRate / 100);
   const totalTTC = totalHT + taxAmount;
 
@@ -41,10 +39,10 @@ export async function createQuote(formData: FormData) {
       totalTTC: totalTTC,
       userId: session.user.id,
       items: {
-        create: items.map((item: any) => ({
+        create: items.map((item) => ({
           description: item.description,
-          quantity: Number(item.quantity),
-          unitPrice: Number(item.unitPrice),
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
         })),
       },
     },
@@ -54,34 +52,40 @@ export async function createQuote(formData: FormData) {
   return { success: true };
 }
 
-// 2. Changement de statut (Sécurisé)
-export async function updateQuoteStatus(quoteId: string, newStatus: QuoteStatus) {
+export async function updateQuoteStatus(quoteId: string, newStatus: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
+  // Validation de l'ID et du Statut
+  const validatedId = IdSchema.safeParse(quoteId);
+  const validatedStatus = QuoteStatusSchema.safeParse(newStatus);
+  if (!validatedId.success || !validatedStatus.success) throw new Error("Données invalides.");
+
   const quote = await prisma.quote.findFirst({
-    where: { id: quoteId, userId: session.user.id }
+    where: { id: validatedId.data, userId: session.user.id }
   });
   
   if (!quote) throw new Error("Devis introuvable");
   if (quote.status === "ACCEPTED") throw new Error("Un devis accepté ne peut plus être modifié.");
 
   await prisma.quote.update({
-    where: { id: quoteId },
-    data: { status: newStatus },
+    where: { id: validatedId.data },
+    data: { status: validatedStatus.data },
   });
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
 }
 
-// 3. Conversion d'un devis en facture (Corrigé : plus de redirect ici)
 export async function convertToInvoice(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
+  const validatedId = IdSchema.safeParse(quoteId);
+  if (!validatedId.success) throw new Error("Identifiant invalide.");
+
   const existingInvoice = await prisma.invoice.findUnique({
-    where: { quoteId: quoteId },
+    where: { quoteId: validatedId.data },
   });
 
   if (existingInvoice) {
@@ -89,7 +93,7 @@ export async function convertToInvoice(quoteId: string) {
   }
 
   const quote = await prisma.quote.findFirst({
-    where: { id: quoteId, userId: session.user.id },
+    where: { id: validatedId.data, userId: session.user.id },
     include: { items: true },
   });
 
@@ -122,22 +126,23 @@ export async function convertToInvoice(quoteId: string) {
 
   revalidatePath("/invoices");
   revalidatePath(`/quotes/${quoteId}`);
-  
   return { success: true, invoiceId: invoice.id };
 }
 
-// 4. Suppression d'un devis (Sécurisé)
 export async function deleteQuote(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
+  const validatedId = IdSchema.safeParse(quoteId);
+  if (!validatedId.success) throw new Error("Identifiant invalide.");
+
   const quote = await prisma.quote.findFirst({
-    where: { id: quoteId, userId: session.user.id }
+    where: { id: validatedId.data, userId: session.user.id }
   });
 
   if (!quote) throw new Error("Devis introuvable");
   if (quote.status === "ACCEPTED") throw new Error("Un devis accepté ne peut pas être supprimé.");
 
-  await prisma.quote.delete({ where: { id: quoteId } });
+  await prisma.quote.delete({ where: { id: validatedId.data } });
   revalidatePath("/quotes");
 }
