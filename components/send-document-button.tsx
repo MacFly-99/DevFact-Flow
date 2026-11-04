@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Send, Loader2, Check } from "lucide-react";
 import { sendDocument } from "@/lib/actions/send-document";
+import { toast } from "sonner";
 
 export function SendDocumentButton({ id, type }: { id: string, type: "quote" | "invoice" }) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -12,11 +13,12 @@ export function SendDocumentButton({ id, type }: { id: string, type: "quote" | "
     try {
       await sendDocument(id, type);
       setStatus("success");
-      // On remet le bouton à son état normal après 3 secondes
+      toast.success("Document envoyé !", { description: "Le client a bien reçu l'email avec le PDF." });
       setTimeout(() => setStatus("idle"), 3000);
     } catch (error) {
       console.error(error);
       setStatus("error");
+      toast.error("Erreur d'envoi", { description: "Veuillez vérifier la configuration de votre email." });
       setTimeout(() => setStatus("idle"), 3000);
     }
   };

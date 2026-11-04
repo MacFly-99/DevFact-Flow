@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { updateInvoiceStatus } from "../actions";
 import { InvoiceStatus } from "../../../src/generated/prisma/client";
 import { ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,6 @@ export function InvoiceStatusDropdown({ invoiceId, currentStatus }: { invoiceId:
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
-  // Les statuts spécifiques aux factures
   const statuses: InvoiceStatus[] = ["DRAFT", "SENT", "PAID", "OVERDUE"];
 
   const getStatusColor = (status: InvoiceStatus) => {
@@ -28,7 +28,6 @@ export function InvoiceStatusDropdown({ invoiceId, currentStatus }: { invoiceId:
     }
   };
 
-  // Petite fonction pour traduire en français à l'affichage
   const getStatusLabel = (status: InvoiceStatus) => {
     switch (status) {
       case "PAID": return "Payée";
@@ -40,8 +39,13 @@ export function InvoiceStatusDropdown({ invoiceId, currentStatus }: { invoiceId:
 
   const handleStatusChange = (newStatus: InvoiceStatus) => {
     setOpen(false);
-    startTransition(() => {
-      updateInvoiceStatus(invoiceId, newStatus);
+    startTransition(async () => {
+      try {
+        await updateInvoiceStatus(invoiceId, newStatus);
+        toast.success("Statut mis à jour", { description: `La facture est maintenant au statut ${getStatusLabel(newStatus)}.` });
+      } catch (error) {
+        toast.error("Erreur", { description: "Impossible de mettre à jour le statut." });
+      }
     });
   };
 
