@@ -15,6 +15,22 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
+  // On récupère l'utilisateur
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+  });
+
+  if (!user) throw new Error("Utilisateur introuvable");
+
+  const issuer = {
+    companyName: user.companyName,
+    companyAddress: user.companyAddress,
+    companySiret: user.companySiret,
+    companyVat: user.companyVat,
+    phone: user.phone,
+    email: user.email,
+  };
+
   let documentData;
   let docTypeLabel: "DEVIS" | "FACTURE" = "DEVIS";
   let fileName = "";
@@ -23,7 +39,7 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
   let docNumber = "";
   let currentStatus = "";
 
-  // 1. Récupération des données
+  // 1. Récupération des données du document
   if (type === "quote") {
     const quote = await prisma.quote.findFirst({
       where: { id, userId: session.user.id },
@@ -64,7 +80,10 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
   }
 
   // 2. Génération du PDF en mémoire (Buffer)
-  const stream = await renderToStream(<PdfDocument type={docTypeLabel} {...documentData} />);
+  const stream = await renderToStream(
+    <PdfDocument type={docTypeLabel} {...documentData} issuer={issuer} />
+  );
+  
   const chunks: Uint8Array[] = [];
   for await (const chunk of stream) {
     chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
@@ -74,7 +93,7 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
   // 3. Envoi de l'email via Resend
   const { data, error } = await resend.emails.send({
     from: "DevFact Flow <onboarding@resend.dev>", 
-    to: ["matxav99@gmail.com"], 
+    to: ["matxav99@gmail.com"], // METTRE clientEmail EN PRODUCTION
     subject: `Votre ${docTypeLabel.toLowerCase()} #${docNumber}`,
     html: `
       <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
@@ -83,7 +102,7 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
         <p>N'hésitez pas à nous contacter si vous avez la moindre question.</p>
         <br />
         <p>Cordialement,</p>
-        <p><strong>L'équipe DevFact Flow</strong></p>
+        <p><strong>${issuer.companyName || "DevFact Flow"}</strong></p>
       </div>
     `,
     attachments: [

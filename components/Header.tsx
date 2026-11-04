@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, LogOut, User, Shield } from "lucide-react";
+import { Menu, LogOut, User, Shield, Building2 } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import {
@@ -115,6 +115,14 @@ export function Header() {
                   >
                     <User className="mr-2 h-4 w-4" />
                     <span>Mon profil</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem 
+                    render={<Link href="/settings" />} 
+                    className="cursor-pointer focus:bg-white/10"
+                  >
+                    <Building2 className="mr-2 h-4 w-4" />
+                    <span>Paramètres</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 

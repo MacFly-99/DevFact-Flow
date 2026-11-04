@@ -44,9 +44,19 @@ type PdfDocumentProps = {
   taxRate: number;
   taxAmount: number;
   totalTTC: number;
+  issuer: {
+    companyName: string | null;
+    companyAddress: string | null;
+    companySiret: string | null;
+    companyVat: string | null;
+    phone: string | null;
+    email: string;
+  };
 };
 
-export function PdfDocument({ type, number, date, dueDate, status, client, items, total, taxRate, taxAmount, totalTTC }: PdfDocumentProps) {
+export function PdfDocument({ 
+  type, number, date, dueDate, status, client, items, total, taxRate, taxAmount, totalTTC, issuer 
+}: PdfDocumentProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -66,12 +76,16 @@ export function PdfDocument({ type, number, date, dueDate, status, client, items
           </View>
         </View>
 
-        {/* Infos Client */}
+        {/* Infos Émetteur et Client */}
         <View style={styles.infoSection}>
           <View style={styles.infoBlock}>
             <Text style={styles.infoLabel}>Émis par</Text>
-            <Text style={[styles.infoText, styles.textBold]}>DevFact Flow</Text>
-            <Text style={styles.infoText}>contact@devfact-flow.com</Text>
+            <Text style={[styles.infoText, styles.textBold]}>{issuer.companyName || "Votre Entreprise"}</Text>
+            {issuer.companyAddress && <Text style={styles.infoText}>{issuer.companyAddress}</Text>}
+            {issuer.companySiret && <Text style={styles.infoText}>SIRET : {issuer.companySiret}</Text>}
+            {issuer.companyVat && <Text style={styles.infoText}>TVA : {issuer.companyVat}</Text>}
+            {issuer.phone && <Text style={styles.infoText}>{issuer.phone}</Text>}
+            <Text style={styles.infoText}>{issuer.email}</Text>
           </View>
           <View style={styles.infoBlock}>
             <Text style={styles.infoLabel}>Facturé à</Text>
@@ -121,7 +135,7 @@ export function PdfDocument({ type, number, date, dueDate, status, client, items
 
         {/* Footer */}
         <Text style={styles.footer}>
-          DevFact Flow - L'outil de devis et facturation ultra pro. Merci de votre confiance.
+          {issuer.companyName || "DevFact Flow"} - Merci de votre confiance.
         </Text>
       </Page>
     </Document>
