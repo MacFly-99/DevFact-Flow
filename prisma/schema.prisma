@@ -90,7 +90,7 @@ model Verification {
   @@map("verification")
 }
 
-// --- TES MODÈLES MÉTIER (liés à l'utilisateur) ---
+// --- MODÈLES MÉTIER (liés à l'utilisateur) ---
 
 model Client {
   id          String  @id @default(uuid())
@@ -188,4 +188,13 @@ enum InvoiceStatus {
   SENT
   PAID
   OVERDUE
+}
+
+// --- MODÈLE REQUIS PAR BETTER AUTH POUR LE RATE LIMITING ---
+
+model RateLimit {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  count       Int     @default(0)
+  lastRequest BigInt
 }

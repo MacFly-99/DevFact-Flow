@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { CreateQuoteSchema, QuoteStatusSchema, IdSchema } from "@/lib/validations";
 
+// 1. Création d'un devis
 export async function createQuote(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
@@ -25,9 +26,11 @@ export async function createQuote(formData: FormData) {
   const taxAmount = totalHT * (taxRate / 100);
   const totalTTC = totalHT + taxAmount;
 
+  // Génération d'un numéro unique avec suffixe utilisateur
   const count = await prisma.quote.count({ where: { userId: session.user.id } });
   const year = new Date().getFullYear();
-  const quoteNumber = `DEV-${year}-${String(count + 1).padStart(3, "0")}`;
+  const userSuffix = session.user.id.slice(0, 4).toUpperCase(); 
+  const quoteNumber = `DEV-${year}-${String(count + 1).padStart(3, "0")}-${userSuffix}`;
 
   await prisma.quote.create({
     data: {
@@ -52,11 +55,11 @@ export async function createQuote(formData: FormData) {
   return { success: true };
 }
 
+// 2. Changement de statut (Sécurisé)
 export async function updateQuoteStatus(quoteId: string, newStatus: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
-  // Validation de l'ID et du Statut
   const validatedId = IdSchema.safeParse(quoteId);
   const validatedStatus = QuoteStatusSchema.safeParse(newStatus);
   if (!validatedId.success || !validatedStatus.success) throw new Error("Données invalides.");
@@ -77,6 +80,7 @@ export async function updateQuoteStatus(quoteId: string, newStatus: string) {
   revalidatePath("/quotes");
 }
 
+// 3. Conversion d'un devis en facture
 export async function convertToInvoice(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
@@ -100,9 +104,11 @@ export async function convertToInvoice(quoteId: string) {
   if (!quote) throw new Error("Devis introuvable");
   if (quote.status !== "ACCEPTED") throw new Error("Seuls les devis acceptés peuvent être facturés.");
 
+  // Numéro de facture unique avec suffixe
   const count = await prisma.invoice.count({ where: { userId: session.user.id } });
   const year = new Date().getFullYear();
-  const invoiceNumber = `FAC-${year}-${String(count + 1).padStart(3, "0")}`;
+  const userSuffix = session.user.id.slice(0, 4).toUpperCase();
+  const invoiceNumber = `FAC-${year}-${String(count + 1).padStart(3, "0")}-${userSuffix}`;
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -126,9 +132,11 @@ export async function convertToInvoice(quoteId: string) {
 
   revalidatePath("/invoices");
   revalidatePath(`/quotes/${quoteId}`);
+  
   return { success: true, invoiceId: invoice.id };
 }
 
+// 4. Suppression d'un devis (Sécurisé)
 export async function deleteQuote(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
