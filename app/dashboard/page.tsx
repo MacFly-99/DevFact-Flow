@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Users, FileText, Euro, ArrowRight, Clock, FileCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuoteStatus } from "../../src/generated/prisma/client";
+import { RevenueChart } from "@/components/revenue-chart";
 
 function getStatusStyle(status: QuoteStatus) {
   switch (status) {
@@ -23,30 +24,57 @@ export default async function DashboardPage() {
   const userId = session.user.id;
   const firstName = session.user.name?.split(" ")[0] || "Chef";
 
-  // 1. Récupération des données en parallèle
+  // 1. Calcul de la date d'il y a 6 mois
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+  sixMonthsAgo.setDate(1);
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+
   const [
     clientsCount,
     quotesCount,
     invoicesCount,
-    acceptedQuotes,
-    recentQuotes
+    acceptedQuotesAllTime, // Pour le CA global
+    recentQuotes,
+    quotesLastSixMonths   // Pour le graphique
   ] = await Promise.all([
     prisma.client.count({ where: { userId } }),
     prisma.quote.count({ where: { userId } }),
     prisma.invoice.count({ where: { userId } }),
-    prisma.quote.findMany({ 
-      where: { userId, status: "ACCEPTED" },
-      select: { total: true }
-    }),
+    prisma.quote.findMany({ where: { userId, status: "ACCEPTED" }, select: { totalTTC: true } }),
+    prisma.quote.findMany({ where: { userId }, include: { client: true }, orderBy: { createdAt: "desc" }, take: 5 }),
+    // On récupère les devis acceptés des 6 derniers mois
     prisma.quote.findMany({
-      where: { userId },
-      include: { client: true },
-      orderBy: { createdAt: "desc" },
-      take: 5,
+      where: {
+        userId,
+        status: "ACCEPTED",
+        createdAt: { gte: sixMonthsAgo }
+      },
+      select: { totalTTC: true, createdAt: true }
     })
   ]);
 
-  const revenue = acceptedQuotes.reduce((acc, quote) => acc + quote.total, 0);
+  const revenue = acceptedQuotesAllTime.reduce((acc, quote) => acc + quote.totalTTC, 0);
+
+  // 2. Préparation des données pour le graphique (6 derniers mois)
+  const monthlyData = Array.from({ length: 6 }).map((_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (5 - i));
+    return {
+      name: d.toLocaleString('fr-FR', { month: 'short' }), // ex: "janv."
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      revenue: 0
+    };
+  });
+
+  quotesLastSixMonths.forEach(quote => {
+    const qDate = new Date(quote.createdAt);
+    const monthData = monthlyData.find(m => m.month === qDate.getMonth() && m.year === qDate.getFullYear());
+    if (monthData) {
+      monthData.revenue += quote.totalTTC;
+    }
+  });
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto w-full">
@@ -57,9 +85,8 @@ export default async function DashboardPage() {
         <p className="text-text-muted">Voici un résumé de votre activité aujourd'hui.</p>
       </div>
 
-      {/* Cartes de Statistiques (4 colonnes) */}
+      {/* Cartes de Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        
         <div className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-colors">
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-blue-500/10 rounded-lg"><Users className="h-6 w-6 text-blue-400" /></div>
@@ -78,7 +105,6 @@ export default async function DashboardPage() {
           <p className="text-4xl font-bold">{quotesCount}</p>
         </div>
 
-        {/* 👇 Nouvelle carte Factures */}
         <div className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-colors">
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-orange-500/10 rounded-lg"><FileCheck className="h-6 w-6 text-orange-400" /></div>
@@ -96,40 +122,47 @@ export default async function DashboardPage() {
             <p className="text-4xl font-bold text-white">{revenue.toFixed(2)} €</p>
           </div>
         </div>
-
       </div>
 
-      {/* Section : Derniers Devis (inchangé) */}
-      <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-        <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
-          <h2 className="text-xl font-bold flex items-center gap-2"><Clock className="h-5 w-5 text-brand-accent" /> Derniers devis</h2>
-          <Link href="/quotes" className="text-sm text-brand-accent hover:underline">Tout voir</Link>
+      {/* Graphique + Derniers devis */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        
+        {/* Graphique (2/3 de la largeur) */}
+        <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-6">Évolution du Chiffre d'Affaires (6 mois)</h2>
+          <RevenueChart data={monthlyData} />
         </div>
 
-        {recentQuotes.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-text-muted mb-4">Vous n'avez pas encore créé de devis.</p>
-            <Link href="/quotes/new" className="bg-brand-accent text-brand-night px-4 py-2 rounded-md font-bold text-sm">Créer mon premier devis</Link>
+        {/* Derniers devis (1/3 de la largeur) */}
+        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
+            <h2 className="text-lg font-bold flex items-center gap-2"><Clock className="h-5 w-5 text-brand-accent" /> Derniers devis</h2>
           </div>
-        ) : (
-          <div className="divide-y divide-white/5">
-            {recentQuotes.map((quote) => (
-              <Link href={`/quotes/${quote.id}`} key={quote.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 hover:bg-white/5 transition-colors gap-4">
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-xs text-brand-accent bg-brand-accent/10 px-2 py-1 rounded">{quote.number}</span>
-                  <div>
-                    <p className="font-bold text-white">{quote.client.companyName || quote.client.name}</p>
-                    <p className="text-xs text-text-muted">{new Date(quote.createdAt).toLocaleDateString('fr-FR')}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                  <p className="font-mono font-bold">{quote.totalTTC.toFixed(2)} €</p>
-                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border", getStatusStyle(quote.status))}>{quote.status}</span>
-                </div>
-              </Link>
-            ))}
+          
+          <div className="flex-1 overflow-y-auto">
+            {recentQuotes.length === 0 ? (
+              <div className="p-6 text-center text-text-muted text-sm">Aucun devis récent.</div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {recentQuotes.map((quote) => (
+                  <Link href={`/quotes/${quote.id}`} key={quote.id} className="block p-4 hover:bg-white/5 transition-colors">
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="font-bold text-sm text-white truncate pr-2">{quote.client.companyName || quote.client.name}</p>
+                      <p className="font-mono text-sm">{quote.totalTTC.toFixed(2)} €</p>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-[10px] text-text-muted">{new Date(quote.createdAt).toLocaleDateString('fr-FR')}</p>
+                      <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase border", getStatusStyle(quote.status))}>{quote.status}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+          <div className="p-3 border-t border-white/10 bg-black/20 text-center">
+            <Link href="/quotes" className="text-xs text-brand-accent hover:underline">Voir tous les devis</Link>
+          </div>
+        </div>
       </div>
     </div>
   );
