@@ -19,9 +19,22 @@ export default async function QuotesPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/login");
 
+  // Optimisation Prisma : select au lieu d'include
   const quotes = await prisma.quote.findMany({
-    where: { userId: session.user.id }, // FILTRE PAR USER ID
-    include: { client: true },
+    where: { userId: session.user.id },
+    select: {
+      id: true,
+      number: true,
+      status: true,
+      totalTTC: true,
+      createdAt: true,
+      client: {
+        select: {
+          name: true,
+          companyName: true,
+        }
+      }
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -60,7 +73,7 @@ export default async function QuotesPage() {
               </div>
               
               <div className="text-left md:text-right w-full md:w-auto flex md:block justify-between items-center border-t md:border-t-0 border-white/10 pt-3 md:pt-0 mt-2 md:mt-0">
-                <p className="font-bold text-lg">{quote.total.toFixed(2)} €</p>
+                <p className="font-bold text-lg">{quote.totalTTC.toFixed(2)} €</p>
                 <span className={cn(
                   "inline-block text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider border mt-1",
                   getStatusStyle(quote.status)
