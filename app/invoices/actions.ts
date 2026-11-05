@@ -3,9 +3,10 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { InvoiceStatusSchema, IdSchema } from "@/lib/validations";
 
+// 1. Changement de statut
 export async function updateInvoiceStatus(invoiceId: string, newStatus: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
@@ -28,8 +29,10 @@ export async function updateInvoiceStatus(invoiceId: string, newStatus: string) 
 
   revalidatePath(`/invoices/${invoiceId}`);
   revalidatePath("/invoices");
+  revalidateTag("invoices", "default");
 }
 
+// 2. Suppression d'une facture
 export async function deleteInvoice(invoiceId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
@@ -46,4 +49,5 @@ export async function deleteInvoice(invoiceId: string) {
 
   await prisma.invoice.delete({ where: { id: validatedId.data } });
   revalidatePath("/invoices");
+  revalidateTag("invoices", "default");
 }

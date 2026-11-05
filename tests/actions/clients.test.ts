@@ -3,7 +3,12 @@ import { createClient } from '@/app/clients/actions';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// 1. On mocke les dépendances (Auth et Prisma)
+// On ajoute revalidateTag au mock
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(), 
+}));
+
 vi.mock('@/lib/auth', () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
@@ -12,14 +17,8 @@ vi.mock('@/lib/prisma', () => ({
   default: { client: { create: vi.fn() } },
 }));
 
-// On mocke next/headers pour la session
 vi.mock('next/headers', () => ({
   headers: vi.fn(() => Promise.resolve(new Headers())),
-}));
-
-// On mocke next/cache
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
 }));
 
 describe('Server Action: createClient', () => {
@@ -45,7 +44,6 @@ describe('Server Action: createClient', () => {
     formData.append('email', 'email-invalide');
 
     await expect(createClient(formData)).rejects.toThrow();
-    // Prisma ne doit jamais être appelé si Zod échoue
     expect(prisma.client.create).not.toHaveBeenCalled(); 
   });
 

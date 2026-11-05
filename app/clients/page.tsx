@@ -4,18 +4,30 @@ import { ClientCard } from "./client-card";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
+
+// 👇 Fonction cachée pour récupérer les clients
+const getCachedClients = unstable_cache(
+  async (userId: string) => {
+    return prisma.client.findMany({
+      where: { userId },
+      select: {
+        id: true, name: true, email: true, phone: true, companyName: true,
+        _count: { select: { quotes: true, invoices: true } }
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+  ['clients-list'],
+  { revalidate: 60, tags: ['clients'] } // Cache invalidé si 'clients' change
+);
 
 export default async function ClientsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/login");
 
-  const clients = await prisma.client.findMany({
-    where: { userId: session.user.id },
-    include: {
-      _count: { select: { quotes: true, invoices: true } }
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  // Appel de la fonction cachée
+  const clients = await getCachedClients(session.user.id);
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto w-full">
