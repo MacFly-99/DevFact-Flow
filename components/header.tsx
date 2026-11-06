@@ -49,16 +49,13 @@ export function Header() {
     <header className="w-full border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
         
-        {/* Logo (à gauche) */}
         <Link href={session ? "/dashboard" : "/"} className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity">
           DevFact <span className="text-brand-accent">Flow</span>
         </Link>
 
-        {/* Navigation + Profil (à droite) */}
+        {/* NAVIGATION DESKTOP */}
         {session && (
           <div className="hidden md:flex items-center gap-6">
-            
-            {/* Les liens de navigation */}
             <nav className="flex items-center gap-6 text-sm font-medium">
               {links.map((link) => (
                 <Link 
@@ -70,7 +67,6 @@ export function Header() {
                 </Link>
               ))}
 
-              {/* Lien Admin */}
               {isAdmin && (
                 <Link 
                   href="/admin" 
@@ -82,10 +78,8 @@ export function Header() {
               )}
             </nav>
 
-            {/* Séparateur */}
             <div className="w-px h-6 bg-white/10"></div>
 
-            {/* Menu Profil */}
             <DropdownMenu>
               <DropdownMenuTrigger render={<button className="flex items-center gap-3 focus:outline-none cursor-pointer hover:opacity-80 transition-opacity" />}>
                 <div className="text-right hidden md:block max-w-37.5">
@@ -109,18 +103,12 @@ export function Header() {
                     </div>
                   </DropdownMenuLabel>
                   
-                  <DropdownMenuItem 
-                    render={<Link href="/profile" />} 
-                    className="cursor-pointer focus:bg-white/10 mt-1"
-                  >
+                  <DropdownMenuItem render={<Link href="/profile" />} className="cursor-pointer focus:bg-white/10 mt-1">
                     <User className="mr-2 h-4 w-4" />
                     <span>Mon profil</span>
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem 
-                    render={<Link href="/settings" />} 
-                    className="cursor-pointer focus:bg-white/10"
-                  >
+                  <DropdownMenuItem render={<Link href="/settings" />} className="cursor-pointer focus:bg-white/10">
                     <Building2 className="mr-2 h-4 w-4" />
                     <span>Paramètres</span>
                   </DropdownMenuItem>
@@ -145,6 +133,7 @@ export function Header() {
                 <Menu className="h-6 w-6" />
               </SheetTrigger>
               <SheetContent side="right" className="bg-brand-night border-white/10 text-text-main w-70">
+                {/* Infos Utilisateur en haut du menu mobile */}
                 <div className="flex items-center gap-3 mt-8 mb-6 pb-6 border-b border-white/10">
                   <Avatar className="h-10 w-10 border border-white/20">
                     <AvatarImage src={session.user.image || ""} alt={session.user.name || "User"} />
@@ -152,7 +141,7 @@ export function Header() {
                       {getInitials(session.user.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="max-w-45">
+                  <div className="max-w-37.5">
                     <p className="font-bold text-white truncate">{session.user.name}</p>
                     <p className="text-xs text-text-muted truncate">{session.user.email}</p>
                   </div>
@@ -180,6 +169,26 @@ export function Header() {
                       Panneau Admin
                     </Link>
                   )}
+                  
+                  <div className="h-px w-full bg-white/10 my-2"></div>
+                  
+                  {/* Mon Profil et Paramètres dans le menu mobile */}
+                  <Link
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className="text-lg font-medium text-text-muted hover:text-brand-accent transition-colors px-2 py-2 flex items-center gap-3"
+                  >
+                    <User className="h-5 w-5" />
+                    Mon profil
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setOpen(false)}
+                    className="text-lg font-medium text-text-muted hover:text-brand-accent transition-colors px-2 py-2 flex items-center gap-3"
+                  >
+                    <Building2 className="h-5 w-5" />
+                    Paramètres
+                  </Link>
                   
                   <div className="h-px w-full bg-white/10 my-2"></div>
                   
