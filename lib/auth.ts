@@ -25,8 +25,8 @@ export const auth = betterAuth({
   // Configuration du Rate Limiting
   rateLimit: {
     storage: "database", // Persiste les données en base pour résister aux redémarrages
-    window: 600,         // Fenêtre de 10 minutes (en secondes)
-    max: 5,              // 5 requêtes maximum par fenêtre
+    window: 60,         // Fenêtre globale de 1 minute 
+    max: 100,           // On autorise 100 requêtes globales par minute (pour get-session, etc.)
     customRules: {
       // On applique une règle stricte uniquement sur les routes sensibles
       "/api/auth/sign-in/email": { window: 600, max: 5 },
