@@ -28,7 +28,12 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://devfact-flow.vercel.app;",
+            value:
+              process.env.NODE_ENV === "development"
+                ? // En développement, on autorise localhost pour éviter les blocages
+                  "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:3000 https://devfact-flow.vercel.app;"
+                : // En production, on est strict et on autorise seulement l'URL de production
+                  "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://devfact-flow.vercel.app;",
           },
         ],
       },
