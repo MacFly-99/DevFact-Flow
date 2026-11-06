@@ -14,7 +14,7 @@ export function Footer() {
         {/* Liens */}
         <div className="flex gap-6 text-sm text-text-muted">
           <a href="/legal" className="hover:text-brand-accent transition-colors">Mentions légales</a>
-          <a href="/cgv" className="hover:text-brand-accent transition-colors">CGV</a>
+          <a href="/gtc" className="hover:text-brand-accent transition-colors">CGV</a>
           <a href="mailto:admin@devfact-flow.com" className="hover:text-brand-accent transition-colors">Support</a>
         </div>
       </div>
