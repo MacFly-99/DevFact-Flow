@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, LogOut, User, Shield, Building2 } from "lucide-react";
+import { Menu, LogOut, User, Shield, Building2, Wallet } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import {
@@ -34,10 +34,12 @@ export function Header() {
     router.push("/"); 
   };
 
+  // ON AJOUTE LA NOUVELLE PAGE
   const links = [
     { href: "/clients", label: "Clients" },
     { href: "/quotes", label: "Devis" },
     { href: "/invoices", label: "Factures" },
+    { href: "/expenses", label: "Dépenses" },
   ];
 
   const getInitials = (name: string | null | undefined) => {
