@@ -8,31 +8,59 @@ export interface SpendSummary {
   total_par_categorie: CategoryTotal[];
 }
 
-export async function getSpendSummary(): Promise<SpendSummary> {
-  const apiUrl = process.env.DEVSPEND_API_URL;
-  const apiKey = process.env.DEVSPEND_API_KEY;
+export interface Transaction {
+  id: number;
+  date: string;
+  description: string;
+  montant: number;
+  categorie: string;
+  quote_id?: string | null;
+}
 
-  console.log("URL appelée :", apiUrl);
-  console.log("Clé envoyée :", apiKey);
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'X-API-Key': process.env.DEVSPEND_API_KEY as string,
+});
 
-  try {
-    const res = await fetch(`${apiUrl}/analytics/summary`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey as string,
-      },
-      cache: 'no-store', // Pour avoir des données toujours à jour
-    });
+// Récupérer les transactions (avec filtre optionnel)
+export async function getTransactions(quoteId?: string) {
+  const url = quoteId 
+    ? `${process.env.DEVSPEND_API_URL}/transactions?quote_id=${quoteId}`
+    : `${process.env.DEVSPEND_API_URL}/transactions`;
+    
+  const res = await fetch(url, { headers: getHeaders(), cache: 'no-store' });
+  if (!res.ok) return [];
+  return res.json() as Promise<Transaction[]>;
+}
 
-    if (!res.ok) {
-      throw new Error(`Erreur API: ${res.status}`);
-    }
+// Créer une transaction
+export async function createTransaction(data: Partial<Transaction>) {
+  const res = await fetch(`${process.env.DEVSPEND_API_URL}/transactions/`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Erreur lors de la création");
+  return res.json() as Promise<Transaction>;
+}
 
-    return await res.json();
-  } catch (error) {
-    console.error("Impossible de contacter DevSpend-Flow:", error);
-    // On renvoie des données vides en cas d'erreur pour ne pas crasher Next.js
-    return { total_general: 0, total_par_categorie: [] }; 
-  }
+// Modifier une transaction
+export async function updateTransaction(id: number, data: Partial<Transaction>) {
+  const res = await fetch(`${process.env.DEVSPEND_API_URL}/transactions/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Erreur lors de la modification");
+  return res.json() as Promise<Transaction>;
+}
+
+// Supprimer une transaction
+export async function deleteTransaction(id: number) {
+  const res = await fetch(`${process.env.DEVSPEND_API_URL}/transactions/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!res.ok) throw new Error("Erreur lors de la suppression");
+  return true;
 }
