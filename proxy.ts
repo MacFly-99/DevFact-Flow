@@ -31,7 +31,16 @@ export async function proxy(request: NextRequest) {
   });
 
   const isAuthRoute = pathname === "/";
-  const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/clients") || pathname.startsWith("/quotes") || pathname.startsWith("/invoices") || pathname.startsWith("/admin") || pathname.startsWith("/settings") || pathname.startsWith("/profile");
+  
+  const isProtectedRoute = 
+    pathname.startsWith("/dashboard") || 
+    pathname.startsWith("/clients") || 
+    pathname.startsWith("/quotes") || 
+    pathname.startsWith("/invoices") || 
+    pathname.startsWith("/admin") || 
+    pathname.startsWith("/settings") || 
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/expenses");
 
   if (isAuthRoute && session) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
