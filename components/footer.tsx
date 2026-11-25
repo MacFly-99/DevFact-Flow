@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export function Footer() {
   return (
     <footer className="w-full border-t border-white/10 bg-black/20 backdrop-blur-md py-6 mt-auto">
@@ -13,14 +11,10 @@ export function Footer() {
           </p>
         </div>
 
-        {/* Liens */}
-        <div className="flex flex-wrap justify-center gap-6 text-sm text-text-muted">
-          {/* On ajoute le lien vers les dépenses ici */}
-          <Link href="/expenses" className="hover:text-brand-accent transition-colors font-medium text-white/80">
-            Analytics Dépenses
-          </Link>
+        {/* Liens Légaux */}
+        <div className="flex gap-6 text-sm text-text-muted">
           <a href="/legal" className="hover:text-brand-accent transition-colors">Mentions légales</a>
-          <a href="/gtc" className="hover:text-brand-accent transition-colors">CGV</a>
+          <a href="/privacy" className="hover:text-brand-accent transition-colors">Politique de confidentialité</a>
           <a href="mailto:admin@devfact-flow.com" className="hover:text-brand-accent transition-colors">Support</a>
         </div>
       </div>

@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import React from "react";
+import { getTransactions } from "@/lib/devspend";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,10 +15,10 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get("id");
     const type = searchParams.get("type");
+    const variant = (searchParams.get("variant") as "client" | "internal") || "client"; // On récupère le variant
 
     if (!id || !type) return new NextResponse("Paramètres manquants", { status: 400 });
 
-    // On récupère les infos de l'utilisateur pour l'émetteur
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
     });
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
     let documentData;
     let docTypeLabel: "DEVIS" | "FACTURE" = "DEVIS";
     let fileName = "";
+    let expenses: any[] = [];
 
     if (type === "quote") {
       const quote = await prisma.quote.findFirst({
@@ -44,6 +46,11 @@ export async function GET(req: NextRequest) {
       });
       if (!quote) return new NextResponse("Devis introuvable", { status: 404 });
       
+      // On ne récupère les dépenses QUE si c'est la version interne
+      if (variant === "internal") {
+        expenses = await getTransactions(quote.id);
+      }
+
       documentData = {
         number: quote.number,
         date: new Date(quote.createdAt).toLocaleDateString('fr-FR'),
@@ -56,16 +63,20 @@ export async function GET(req: NextRequest) {
         totalTTC: quote.totalTTC,
       };
       docTypeLabel = "DEVIS";
-      fileName = `Devis-${quote.number}.pdf`;
+      fileName = `Devis-${quote.number}${variant === "internal" ? "-INTERNE" : ""}.pdf`;
     } else {
       const invoice = await prisma.invoice.findFirst({
         where: { id, userId: session.user.id },
-        include: { client: true, items: true },
+        include: { client: true, items: true, quote: true },
       });
       if (!invoice) return new NextResponse("Facture introuvable", { status: 404 });
 
       const dueDate = new Date(invoice.createdAt);
       dueDate.setDate(dueDate.getDate() + 30);
+
+      if (variant === "internal" && invoice.quoteId) {
+        expenses = await getTransactions(invoice.quoteId);
+      }
 
       documentData = {
         number: invoice.number,
@@ -80,11 +91,17 @@ export async function GET(req: NextRequest) {
         totalTTC: invoice.totalTTC,
       };
       docTypeLabel = "FACTURE";
-      fileName = `Facture-${invoice.number}.pdf`;
+      fileName = `Facture-${invoice.number}${variant === "internal" ? "-INTERNE" : ""}.pdf`;
     }
 
     const stream = await renderToStream(
-      <PdfDocument type={docTypeLabel} {...documentData} issuer={issuer} />
+      <PdfDocument 
+        type={docTypeLabel} 
+        {...documentData} 
+        issuer={issuer} 
+        expenses={expenses} 
+        variant={variant} // On passe le variant
+      />
     );
 
     const chunks: Uint8Array[] = [];

@@ -23,7 +23,13 @@ const styles = StyleSheet.create({
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
   grandTotalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderTopWidth: 1, borderTopColor: "#ccc", marginTop: 4 },
   grandTotalText: { fontSize: 14, fontWeight: "bold" },
-  footer: { position: "absolute", bottom: 40, left: 40, right: 40, textAlign: "center", fontSize: 8, color: "#999", borderTopWidth: 1, borderTopColor: "#eee", paddingTop: 10 }
+  footer: { position: "absolute", bottom: 40, left: 40, right: 40, textAlign: "center", fontSize: 8, color: "#999", borderTopWidth: 1, borderTopColor: "#eee", paddingTop: 10 },
+  
+  // PARTIE INTERNE
+  internalSection: { marginTop: 40, padding: 15, backgroundColor: "#f9f9f9", borderWidth: 1, borderColor: "#ddd", borderRadius: 4 },
+  internalTitle: { fontSize: 12, fontWeight: "bold", color: "#d32f2f", marginBottom: 10 },
+  internalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: "#eee" },
+  internalTotal: { flexDirection: "row", justifyContent: "space-between", paddingTop: 10, marginTop: 5, borderTopWidth: 2, borderTopColor: "#ccc", fontWeight: "bold" }
 });
 
 type PdfDocumentProps = {
@@ -32,31 +38,28 @@ type PdfDocumentProps = {
   date: string;
   dueDate?: string;
   status: string;
-  client: {
-    name: string;
-    companyName?: string | null;
-    email: string;
-    phone?: string | null;
-    address?: string | null;
-  };
+  client: { name: string; companyName?: string | null; email: string; phone?: string | null; address?: string | null; };
   items: Array<{ description: string; quantity: number; unitPrice: number }>;
   total: number;
   taxRate: number;
   taxAmount: number;
   totalTTC: number;
-  issuer: {
-    companyName: string | null;
-    companyAddress: string | null;
-    companySiret: string | null;
-    companyVat: string | null;
-    phone: string | null;
-    email: string;
-  };
+  issuer: { companyName: string | null; companyAddress: string | null; companySiret: string | null; companyVat: string | null; phone: string | null; email: string; };
+  // PROPS : client ou interne
+  variant?: "client" | "internal";
+  expenses?: Array<{ description: string; montant: number; date: string; categorie: string }>;
 };
 
 export function PdfDocument({ 
-  type, number, date, dueDate, status, client, items, total, taxRate, taxAmount, totalTTC, issuer 
+  type, number, date, dueDate, status, client, items, total, taxRate, taxAmount, totalTTC, issuer,
+  variant = "client", // Par défaut, c'est la version client
+  expenses = []
 }: PdfDocumentProps) {
+
+  // Calculs pour la version interne
+  const totalExpenses = expenses.reduce((acc, exp) => acc + exp.montant, 0);
+  const netProfit = totalTTC - totalExpenses;
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -96,7 +99,7 @@ export function PdfDocument({
           </View>
         </View>
 
-        {/* Tableau */}
+        {/* Tableau des items */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.colDescription, styles.textBold]}>Description</Text>
@@ -115,7 +118,7 @@ export function PdfDocument({
           ))}
         </View>
 
-        {/* Totaux */}
+        {/* Totaux de la facture/devis */}
         <View style={styles.totalsSection}>
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
@@ -132,6 +135,29 @@ export function PdfDocument({
             </View>
           </View>
         </View>
+
+        {/* SECTION INTERNE (UNIQUEMENT SI VARIANT === "internal") */}
+        {variant === "internal" && expenses.length > 0 && (
+          <View style={styles.internalSection} wrap={false}>
+            <Text style={styles.internalTitle}>🔒 RÉCAPITULATIF INTERNE (CONFIDENTIEL)</Text>
+            
+            {expenses.map((exp, index) => (
+              <View key={index} style={styles.internalRow}>
+                <Text>{exp.description} <Text style={{ color: "#666", fontSize: 8 }}>({exp.categorie})</Text></Text>
+                <Text>-{exp.montant.toFixed(2)} €</Text>
+              </View>
+            ))}
+            
+            <View style={styles.internalTotal}>
+              <Text>Total des dépenses</Text>
+              <Text>-{totalExpenses.toFixed(2)} €</Text>
+            </View>
+            <View style={styles.internalTotal}>
+              <Text>Bénéfice Net (Total TTC - Dépenses)</Text>
+              <Text style={{ color: netProfit > 0 ? "green" : "red" }}>{netProfit.toFixed(2)} €</Text>
+            </View>
+          </View>
+        )}
 
         {/* Footer */}
         <Text style={styles.footer}>

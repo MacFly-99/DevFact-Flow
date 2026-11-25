@@ -80,10 +80,10 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
   }
 
   // 2. Génération du PDF en mémoire (Buffer)
-  const stream = await renderToStream(
-    <PdfDocument type={docTypeLabel} {...documentData} issuer={issuer} />
+    const stream = await renderToStream(
+    <PdfDocument type={docTypeLabel} {...documentData} issuer={issuer} variant="client" /> // FORCE LE VARIANT CLIENT ICI
   );
-  
+
   const chunks: Uint8Array[] = [];
   for await (const chunk of stream) {
     chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);

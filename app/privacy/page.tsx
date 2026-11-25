@@ -1,12 +1,12 @@
-export default function CGVPage() {
+export default function PrivacyPage() {
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto w-full">
-      <h1 className="text-3xl font-bold mb-8">Conditions Générales de Vente</h1>
+      <h1 className="text-3xl font-bold mb-8">Politique de Confidentialité</h1>
       
       <div className="space-y-6 text-text-muted leading-relaxed">
         <section>
           <h2 className="text-xl font-bold text-white mb-3">1. Objet</h2>
-          <p>Les présentes CGV régissent l'utilisation du service DevFact Flow, une application SaaS de gestion de devis et de facturation.</p>
+          <p>La présente politique de confidentialité régit l'utilisation du service DevFact Flow, une application SaaS de gestion de devis et de facturation.</p>
         </section>
 
         <section>
