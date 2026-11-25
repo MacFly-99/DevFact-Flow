@@ -1,13 +1,13 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
-import { InvoiceStatusDropdown } from "./status-dropdown";
-import { DeleteInvoiceButton } from "./delete-button"; // 👈 Import
 import { PdfDownloadButton } from "@/components/pdf-download-button";
 import { SendDocumentButton } from "@/components/send-document-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { InvoiceStatusDropdown } from "./status-dropdown"; 
+import { DeleteInvoiceButton } from "./delete-button"; 
 
 export default async function InvoiceDetailsPage({ 
   params 
@@ -19,43 +19,32 @@ export default async function InvoiceDetailsPage({
   if (!session?.user?.id) redirect("/");
 
   const invoice = await prisma.invoice.findFirst({
-    where: { 
-      id: id,
-      userId: session.user.id 
-    },
-    include: {
-      client: true,
-      items: true,
-    },
+    where: { id: id, userId: session.user.id },
+    include: { client: true, items: true, quote: true },
   });
 
-  if (!invoice) {
-    notFound();
-  }
-
-  const dueDate = new Date(invoice.createdAt);
-  dueDate.setDate(dueDate.getDate() + 30);
+  if (!invoice) notFound();
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
+      
+      {/* Header de la facture */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <Link href="/invoices" className="text-brand-accent hover:underline flex items-center gap-2 text-sm">
           <ArrowLeft className="h-4 w-4" /> Retour aux factures
         </Link>
         
-        <div className="flex flex-wrap gap-3 w-full md:w-auto items-center justify-end">
-          
-          {/* Bouton de suppression (uniquement si pas payée) */}
+        <div className="flex flex-wrap gap-3 w-full md:w-auto items-center">
           {invoice.status !== "PAID" && (
             <DeleteInvoiceButton invoiceId={invoice.id} />
           )}
 
           <PdfDownloadButton id={invoice.id} type="invoice" />
-
           <SendDocumentButton id={invoice.id} type="invoice" />
         </div>
       </div>
 
+      {/* Contenu de la facture */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 md:p-10 shadow-2xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-8 mb-8 gap-6">
           <div>
@@ -64,9 +53,6 @@ export default async function InvoiceDetailsPage({
             </h1>
             <p className="text-text-muted text-sm">
               Émise le {new Date(invoice.createdAt).toLocaleDateString('fr-FR')}
-            </p>
-            <p className="text-text-muted text-sm font-medium mt-1">
-              Échéance : {dueDate.toLocaleDateString('fr-FR')}
             </p>
           </div>
           <div className="text-left md:text-right">
@@ -99,42 +85,23 @@ export default async function InvoiceDetailsPage({
           <div className="space-y-4">
             {invoice.items.map((item) => (
               <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 border-b border-white/5 pb-4 md:pb-3 items-center">
-                <div className="col-span-1 md:col-span-6 font-medium text-white">
-                  {item.description}
-                </div>
-                <div className="col-span-1 md:col-span-2 text-left md:text-center text-sm text-text-muted">
-                  <span className="md:hidden font-semibold">Qté : </span>{item.quantity}
-                </div>
-                <div className="col-span-1 md:col-span-2 text-left md:text-right text-sm text-text-muted">
-                  <span className="md:hidden font-semibold">P.U. : </span>{item.unitPrice.toFixed(2)} €
-                </div>
-                <div className="col-span-1 md:col-span-2 text-left md:text-right font-mono font-bold text-white mt-1 md:mt-0">
-                  {(item.quantity * item.unitPrice).toFixed(2)} €
-                </div>
+                <div className="col-span-1 md:col-span-6 font-medium text-white">{item.description}</div>
+                <div className="col-span-1 md:col-span-2 text-left md:text-center text-sm text-text-muted"><span className="md:hidden font-semibold">Qté : </span>{item.quantity}</div>
+                <div className="col-span-1 md:col-span-2 text-left md:text-right text-sm text-text-muted"><span className="md:hidden font-semibold">P.U. : </span>{item.unitPrice.toFixed(2)} €</div>
+                <div className="col-span-1 md:col-span-2 text-left md:text-right font-mono font-bold text-white mt-1 md:mt-0">{(item.quantity * item.unitPrice).toFixed(2)} €</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Total avec TVA */}
         <div className="flex justify-end border-t border-white/10 pt-6">
           <div className="w-full md:w-1/2 flex flex-col gap-2">
-            <div className="flex justify-between text-sm text-text-muted">
-              <span>Total HT</span>
-              <span>{invoice.total.toFixed(2)} €</span>
-            </div>
-            <div className="flex justify-between text-sm text-text-muted">
-              <span>TVA ({invoice.taxRate}%)</span>
-              <span>{invoice.taxAmount.toFixed(2)} €</span>
-            </div>
-            <p className="text-xs text-text-muted mt-2">Payable sous 30 jours.</p>
-            <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2">
-              <span>Total TTC</span>
-              <span className="text-brand-accent">{invoice.totalTTC.toFixed(2)} €</span>
-            </div>
+            <div className="flex justify-between text-sm text-text-muted"><span>Total HT</span><span>{invoice.total.toFixed(2)} €</span></div>
+            <div className="flex justify-between text-sm text-text-muted"><span>TVA ({invoice.taxRate}%)</span><span>{invoice.taxAmount.toFixed(2)} €</span></div>
+            <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-white/10 mt-2"><span>Total TTC</span><span className="text-brand-accent">{invoice.totalTTC.toFixed(2)} €</span></div>
           </div>
         </div>
-      </div>
+      </div>      
     </div>
   );
 }

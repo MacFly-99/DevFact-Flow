@@ -4,11 +4,12 @@ import { ArrowLeft, Send, FileText } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { StatusDropdown } from "./status-dropdown";
 import { ConvertToInvoiceButton } from "./convert-button";
-import { DeleteQuoteButton } from "./delete-button"; // 👈 Import
+import { DeleteQuoteButton } from "./delete-button";
 import { PdfDownloadButton } from "@/components/pdf-download-button";
 import { SendDocumentButton } from "@/components/send-document-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { QuoteExpensesWidget } from "@/components/quote-expenses-widget";
 
 export default async function QuoteDetailsPage({ 
   params 
@@ -34,8 +35,6 @@ export default async function QuoteDetailsPage({
         </Link>
         
         <div className="flex flex-wrap gap-3 w-full md:w-auto items-center">
-          
-          {/* Bouton de suppression (si pas accepté) */}
           {quote.status !== "ACCEPTED" && (
             <DeleteQuoteButton quoteId={quote.id} />
           )}
@@ -116,6 +115,13 @@ export default async function QuoteDetailsPage({
           </div>
         </div>
       </div>
+
+      <QuoteExpensesWidget 
+        quoteId={quote.id} 
+        quoteTotalTTC={quote.totalTTC} 
+        quoteStatus={quote.status} 
+      />
+      
     </div>
   );
 }
