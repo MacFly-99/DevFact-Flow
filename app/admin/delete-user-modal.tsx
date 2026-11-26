@@ -46,7 +46,6 @@ export function DeleteUserModal({ userId, userName }: { userId: string, userName
             <AlertTriangle className="h-6 w-6" /> Supprimer définitivement ?
           </AlertDialogTitle>
           
-          {/* 👇 On utilise des <span className="block"> au lieu de <p> et <div> */}
           <AlertDialogDescription className="text-text-muted space-y-4 pt-2">
             <span className="block">
               Êtes-vous sûr de vouloir supprimer le compte de <strong className="text-white text-base">{userName}</strong> ?

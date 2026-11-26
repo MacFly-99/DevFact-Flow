@@ -66,7 +66,7 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
   return (
     <form action={onSubmit} className="space-y-8 bg-white/5 p-4 md:p-8 rounded-xl border border-white/10">
       
-      {/* SÉLECTION DU CLIENT (inchangé) */}
+      {/* SÉLECTION DU CLIENT */}
       <div className="max-w-md">
         <label htmlFor="clientId" className="block text-sm font-medium mb-2 text-text-main">Client *</label>
         <Select name="clientId" required items={clients.map(c => ({ value: c.id, label: c.name }))}>
@@ -83,7 +83,7 @@ export function QuoteForm({ clients }: { clients: Client[] }) {
         </Select>
       </div>
 
-      {/* LIGNES D'ARTICLES (inchangé) */}
+      {/* LIGNES D'ARTICLES */}
       <div className="space-y-2">
         <div className="flex justify-between items-center border-b border-white/10 pb-2 mb-4">
           <h3 className="text-lg font-bold">Détail des prestations</h3>

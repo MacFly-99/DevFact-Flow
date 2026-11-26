@@ -61,7 +61,7 @@ export default async function DashboardPage() {
     const d = new Date();
     d.setMonth(d.getMonth() - (5 - i));
     return {
-      name: d.toLocaleString('fr-FR', { month: 'short' }), // ex: "janv."
+      name: d.toLocaleString('fr-FR', { month: 'short' }),
       year: d.getFullYear(),
       month: d.getMonth(),
       revenue: 0

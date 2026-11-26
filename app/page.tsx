@@ -57,7 +57,6 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-text-muted mt-6 flex items-center justify-center gap-1">
           Pas encore de compte ? 
-          {/* On appelle la modale ici */}
           <RegisterModal />
         </p>
       </div>

@@ -17,7 +17,6 @@ export async function QuoteExpensesWidget({
   const netProfit = quoteTotalTTC - totalExpenses;
   const isProfitable = netProfit > 0;
   
-  // On verrouille si ACCEPTED ou PAID
   const isLocked = quoteStatus === "ACCEPTED" || quoteStatus === "PAID";
 
   return (

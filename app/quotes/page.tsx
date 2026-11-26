@@ -19,7 +19,6 @@ export default async function QuotesPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/login");
 
-  // Optimisation Prisma : select au lieu d'include
   const quotes = await prisma.quote.findMany({
     where: { userId: session.user.id },
     select: {

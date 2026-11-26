@@ -93,7 +93,7 @@ export async function sendDocument(id: string, type: "quote" | "invoice") {
   // 3. Envoi de l'email via Resend
   const { data, error } = await resend.emails.send({
     from: "DevFact Flow <onboarding@resend.dev>", 
-    to: ["matxav99@gmail.com"], // METTRE clientEmail EN PRODUCTION
+    to: ["matxav99@gmail.com"],
     subject: `Votre ${docTypeLabel.toLowerCase()} #${docNumber}`,
     html: `
       <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
