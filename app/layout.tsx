@@ -19,11 +19,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className={cn("font-sans", inter.variable, "dark")}>
       <body className="antialiased">
-        {/* Le conteneur principal prend toute la hauteur de l'écran */}
         <div className="bg-geometric-pattern min-h-screen w-full flex flex-col">
           <Header />
           
-          {/* La balise main avec "flex-1" va s'étirer pour pousser le footer en bas */}
           <main className="flex-1 flex flex-col">
             {children}
           </main>

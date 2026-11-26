@@ -34,7 +34,6 @@ export function Header() {
     router.push("/"); 
   };
 
-  // ON AJOUTE LA NOUVELLE PAGE
   const links = [
     { href: "/clients", label: "Clients" },
     { href: "/quotes", label: "Devis" },

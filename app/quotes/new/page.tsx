@@ -9,7 +9,6 @@ export default async function NewQuotePage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/login");
 
-  // FILTRE PAR USER ID : On ne veut que les clients de cet utilisateur
   const clients = await prisma.client.findMany({
     where: { userId: session.user.id },
     orderBy: { name: "asc" },

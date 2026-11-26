@@ -20,7 +20,6 @@ export default async function SettingsPage() {
       <p className="text-text-muted mb-8">Ces informations apparaîtront sur vos devis et factures PDF.</p>
 
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8">
-        {/* 👇 On utilise notre composant client */}
         <SettingsForm user={user} />
       </div>
     </div>

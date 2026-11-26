@@ -45,7 +45,6 @@ export function ClientCard({ client }: ClientCardProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-brand-night border-white/10 text-text-main sm:max-w-106.25">
           
-          {/* 👇 Ajout de pr-8 ici pour éviter le chevauchement avec la croix de fermeture */}
           <DialogHeader className="flex flex-row items-center justify-between pb-2 border-b border-white/10 pr-8">
             <DialogTitle className="text-2xl">{client.companyName || client.name}</DialogTitle>
             

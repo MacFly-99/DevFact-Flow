@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
         {...documentData} 
         issuer={issuer} 
         expenses={expenses} 
-        variant={variant} // On passe le variant
+        variant={variant}
       />
     );
 

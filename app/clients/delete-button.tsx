@@ -20,7 +20,6 @@ export function DeleteClientButton({ clientId, clientName }: { clientId: string,
         toast.success("Client supprimé", { description: `Le compte de ${clientName} a été supprimé.` });
         setOpen(false);
       } catch (error: any) {
-        // C'est ici que l'erreur du serveur (si le client a des factures payées) sera affichée
         toast.error("Suppression impossible", { description: error.message });
         setOpen(false);
       }

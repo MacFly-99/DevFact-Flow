@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { unstable_cache } from "next/cache";
 
-// 👇 Fonction cachée pour récupérer les clients
+// Fonction cachée pour récupérer les clients
 const getCachedClients = unstable_cache(
   async (userId: string) => {
     return prisma.client.findMany({

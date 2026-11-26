@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation"; // 👈 Import du router
+import { useRouter } from "next/navigation";
 import { updateCompanySettings } from "./actions";
 import { toast } from "sonner";
 import { Building2, MapPin, Hash, FileText, Phone, Loader2 } from "lucide-react";
@@ -28,7 +28,7 @@ export function SettingsForm({ user }: { user: UserData }) {
         });
         
         router.push("/dashboard");
-        router.refresh(); // Pour s'assurer que les données du dashboard sont à jour
+        router.refresh();
         
       } catch (error) {
         toast.error("Erreur", {
