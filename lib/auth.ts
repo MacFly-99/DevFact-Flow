@@ -4,7 +4,16 @@ import { nextCookies } from "better-auth/next-js";
 import prisma from "@/lib/prisma";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL, 
+  // On configure l'URL de manière robuste pour localhost ET Vercel
+  baseURL: {
+    allowedHosts: [
+      "localhost:3000",       // Pour le développement local
+      "*.vercel.app",         // Pour le site en prod et les previews Vercel
+    ],
+    // HTTP en local, HTTPS en production
+    protocol: process.env.NODE_ENV === "development" ? "http" : "https", 
+  },
+  
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -25,8 +34,8 @@ export const auth = betterAuth({
   // Configuration du Rate Limiting
   rateLimit: {
     storage: "database", // Persiste les données en base pour résister aux redémarrages
-    window: 60,         // Fenêtre globale de 1 minute 
-    max: 100,           // On autorise 100 requêtes globales par minute (pour get-session, etc.)
+    window: 60,          // Fenêtre globale de 1 minute
+    max: 100,            // On autorise 100 requêtes globales par minute (pour get-session, etc.)
     customRules: {
       // On applique une règle stricte uniquement sur les routes sensibles
       "/api/auth/sign-in/email": { window: 600, max: 5 },
