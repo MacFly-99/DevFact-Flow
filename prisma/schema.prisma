@@ -33,6 +33,7 @@ model User {
   clients       Client[]
   quotes        Quote[]
   invoices      Invoice[]
+  expenses      Expense[]
 
   // Relations Better Auth
   sessions Session[]
@@ -121,8 +122,10 @@ model Quote {
   clientId String
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
-  items QuoteItem[]
-  total Float       @default(0)
+  items     QuoteItem[]
+  expenses  Expense[]
+
+  total     Float       @default(0)
   taxRate   Float       @default(20.0)
   taxAmount Float       @default(0.0)
   totalTTC  Float       @default(0.0)
@@ -174,6 +177,22 @@ model InvoiceItem {
 
   invoiceId String
   invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  description String
+  montant     Float
+  categorie   String
+  date        DateTime
+  quoteId     String?
+  quote       Quote?   @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum QuoteStatus {

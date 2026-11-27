@@ -1,4 +1,4 @@
-import { getTransactions } from "@/lib/devspend";
+import prisma from "@/lib/prisma";
 import { AddExpenseButton } from "./add-expense-button";
 import { Wallet, TrendingUp, AlertCircle, Lock } from "lucide-react";
 
@@ -11,7 +11,10 @@ export async function QuoteExpensesWidget({
   quoteTotalTTC: number, 
   quoteStatus: string 
 }) {
-  const expenses = await getTransactions(quoteId);
+  const expenses = await prisma.expense.findMany({
+    where: { quoteId },
+    orderBy: { date: 'desc' }
+  });
   
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.montant, 0);
   const netProfit = quoteTotalTTC - totalExpenses;
@@ -27,7 +30,6 @@ export async function QuoteExpensesWidget({
           Coûts & Rentabilité
         </h2>
         
-        {/* Condition d'affichage du bouton ou du cadenas */}
         {isLocked ? (
           <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-md font-medium text-sm">
             <Lock className="h-4 w-4" />

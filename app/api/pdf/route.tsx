@@ -5,7 +5,6 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import React from "react";
-import { getTransactions } from "@/lib/devspend";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,7 +14,7 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get("id");
     const type = searchParams.get("type");
-    const variant = (searchParams.get("variant") as "client" | "internal") || "client"; // On récupère le variant
+    const variant = (searchParams.get("variant") as "client" | "internal") || "client";
 
     if (!id || !type) return new NextResponse("Paramètres manquants", { status: 400 });
 
@@ -37,7 +36,7 @@ export async function GET(req: NextRequest) {
     let documentData;
     let docTypeLabel: "DEVIS" | "FACTURE" = "DEVIS";
     let fileName = "";
-    let expenses: any[] = [];
+    let rawExpenses: any[] = [];
 
     if (type === "quote") {
       const quote = await prisma.quote.findFirst({
@@ -46,9 +45,8 @@ export async function GET(req: NextRequest) {
       });
       if (!quote) return new NextResponse("Devis introuvable", { status: 404 });
       
-      // On ne récupère les dépenses QUE si c'est la version interne
       if (variant === "internal") {
-        expenses = await getTransactions(quote.id);
+        rawExpenses = await prisma.expense.findMany({ where: { quoteId: quote.id } });
       }
 
       documentData = {
@@ -75,7 +73,7 @@ export async function GET(req: NextRequest) {
       dueDate.setDate(dueDate.getDate() + 30);
 
       if (variant === "internal" && invoice.quoteId) {
-        expenses = await getTransactions(invoice.quoteId);
+        rawExpenses = await prisma.expense.findMany({ where: { quoteId: invoice.quoteId } });
       }
 
       documentData = {
@@ -93,6 +91,14 @@ export async function GET(req: NextRequest) {
       docTypeLabel = "FACTURE";
       fileName = `Facture-${invoice.number}${variant === "internal" ? "-INTERNE" : ""}.pdf`;
     }
+
+    // On formate les dates des dépenses pour qu'elles soient des strings dans le PDF
+    const expenses = rawExpenses.map(exp => ({
+      description: exp.description,
+      montant: exp.montant,
+      categorie: exp.categorie,
+      date: new Date(exp.date).toLocaleDateString('fr-FR')
+    }));
 
     const stream = await renderToStream(
       <PdfDocument 
