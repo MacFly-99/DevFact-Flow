@@ -17,6 +17,14 @@ export function PasswordForm() {
     const formData = new FormData(e.currentTarget);
     const currentPassword = formData.get("currentPassword") as string;
     const newPassword = formData.get("newPassword") as string;
+    const confirmNewPassword = formData.get("confirmNewPassword") as string;
+
+    // VÉRIFICATION DE SÉCURITÉ
+    if (newPassword !== confirmNewPassword) {
+      setError("Les nouveaux mots de passe ne correspondent pas.");
+      setIsLoading(false);
+      return;
+    }
 
     const { error } = await authClient.changePassword({
       currentPassword,
@@ -45,6 +53,7 @@ export function PasswordForm() {
           className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent"
         />
       </div>
+      
       <div>
         <label className="block text-sm font-medium mb-1">Nouveau mot de passe</label>
         <input
@@ -52,6 +61,15 @@ export function PasswordForm() {
           className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent"
         />
       </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Confirmer le nouveau mot de passe</label>
+        <input
+          type="password" name="confirmNewPassword" required minLength={8}
+          className="w-full bg-black/50 border border-white/20 rounded-md p-3 text-white focus:outline-none focus:border-brand-accent"
+        />
+      </div>
+
       <button
         type="submit" disabled={isLoading}
         className="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
