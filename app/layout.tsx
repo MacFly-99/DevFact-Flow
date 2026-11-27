@@ -9,8 +9,32 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "DevFact Flow",
-  description: "Outil de devis et facturation",
+  metadataBase: new URL('https://devfact-flow.vercel.app'),
+  title: {
+    default: "DevFact Flow | Gestion de devis et facturation",
+    template: "%s | DevFact Flow"
+  },
+  description: "L'outil SaaS tout-en-un pour gérer vos clients, créer vos devis, facturer et suivre vos dépenses en toute simplicité.",
+  keywords: ["devis", "facturation", "gestion clients", "SaaS", "freelance", "TVA"],
+  authors: [{ name: "DevFact Flow" }],
+  creator: "DevFact Flow",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: "https://devfact-flow.vercel.app",
+    title: "DevFact Flow | Gestion de devis et facturation",
+    description: "L'outil SaaS tout-en-un pour gérer vos clients, créer vos devis, facturer et suivre vos dépenses.",
+    siteName: "DevFact Flow",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DevFact Flow | Gestion de devis et facturation",
+    description: "L'outil SaaS tout-en-un pour gérer vos clients, créer vos devis, facturer et suivre vos dépenses.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -21,11 +45,9 @@ export default function RootLayout({
       <body className="antialiased">
         <div className="bg-geometric-pattern min-h-screen w-full flex flex-col">
           <Header />
-          
           <main className="flex-1 flex flex-col">
             {children}
           </main>
-          
           <Footer />
         </div>
         <Toaster richColors position="bottom-right" />
