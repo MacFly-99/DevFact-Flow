@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { limiters } from "@/lib/rate-limit";
 import { ipAddress } from "@vercel/functions";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // On ne rate limite que les routes qui sont protégées
@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/expenses");
 
   if (isProtectedRoute) {
-    // 1. On récupère l'IP de manière fiable grâce au package de Vercel
+    // 1. On récupère l'IP de manière fiable
     const ip = ipAddress(request) || "127.0.0.1";
 
     // 2. On appelle le limiteur global
