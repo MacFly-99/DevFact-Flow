@@ -5,11 +5,15 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { InvoiceStatusSchema, IdSchema } from "@/lib/validations";
+import { limiters } from "@/lib/rate-limit";
 
 // 1. Changement de statut
 export async function updateInvoiceStatus(invoiceId: string, newStatus: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const validatedId = IdSchema.safeParse(invoiceId);
   const validatedStatus = InvoiceStatusSchema.safeParse(newStatus);
@@ -36,6 +40,9 @@ export async function updateInvoiceStatus(invoiceId: string, newStatus: string) 
 export async function deleteInvoice(invoiceId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const validatedId = IdSchema.safeParse(invoiceId);
   if (!validatedId.success) throw new Error("Identifiant invalide.");

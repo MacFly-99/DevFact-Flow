@@ -5,11 +5,16 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CreateQuoteSchema, QuoteStatusSchema, IdSchema } from "@/lib/validations";
+import { limiters } from "@/lib/rate-limit";
 
 // 1. Création d'un devis
 export async function createQuote(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  // RATE LIMITING
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const rawData = {
     clientId: formData.get("clientId"),
@@ -60,6 +65,9 @@ export async function updateQuoteStatus(quoteId: string, newStatus: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
 
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
+
   const validatedId = IdSchema.safeParse(quoteId);
   const validatedStatus = QuoteStatusSchema.safeParse(newStatus);
   if (!validatedId.success || !validatedStatus.success) throw new Error("Données invalides.");
@@ -85,6 +93,9 @@ export async function updateQuoteStatus(quoteId: string, newStatus: string) {
 export async function convertToInvoice(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const validatedId = IdSchema.safeParse(quoteId);
   if (!validatedId.success) throw new Error("Identifiant invalide.");
@@ -142,6 +153,9 @@ export async function convertToInvoice(quoteId: string) {
 export async function deleteQuote(quoteId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const validatedId = IdSchema.safeParse(quoteId);
   if (!validatedId.success) throw new Error("Identifiant invalide.");

@@ -5,6 +5,14 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import React from "react";
+import { z } from "zod";
+
+// Schéma de validation des paramètres d'URL
+const PdfParamsSchema = z.object({
+  id: z.string().uuid("L'ID du document est invalide."),
+  type: z.enum(["quote", "invoice"]),
+  variant: z.enum(["client", "internal"]).default("client"),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,11 +20,19 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.id) return new NextResponse("Non autorisé", { status: 401 });
 
     const searchParams = req.nextUrl.searchParams;
-    const id = searchParams.get("id");
-    const type = searchParams.get("type");
-    const variant = (searchParams.get("variant") as "client" | "internal") || "client";
+    const rawParams = {
+      id: searchParams.get("id"),
+      type: searchParams.get("type"),
+      variant: searchParams.get("variant") || "client",
+    };
 
-    if (!id || !type) return new NextResponse("Paramètres manquants", { status: 400 });
+    // Validation avec Zod
+    const validatedParams = PdfParamsSchema.safeParse(rawParams);
+    if (!validatedParams.success) {
+      return new NextResponse("Paramètres invalides", { status: 400 });
+    }
+
+    const { id, type, variant } = validatedParams.data;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -92,7 +108,6 @@ export async function GET(req: NextRequest) {
       fileName = `Facture-${invoice.number}${variant === "internal" ? "-INTERNE" : ""}.pdf`;
     }
 
-    // On formate les dates des dépenses pour qu'elles soient des strings dans le PDF
     const expenses = rawExpenses.map(exp => ({
       description: exp.description,
       montant: exp.montant,

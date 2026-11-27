@@ -41,3 +41,12 @@ export const UpdateCompanySchema = z.object({
   companyVat: z.string().max(20).optional(),
   phone: z.string().max(20).optional(),
 });
+
+// --- DÉPENSES ---
+export const ExpenseSchema = z.object({
+  description: z.string().min(2, "La description est trop courte").max(255),
+  montant: z.number().positive("Le montant doit être supérieur à 0"),
+  categorie: z.string().min(1).max(50),
+  date: z.string().datetime().or(z.string().date()), // Accepte le format ISO ou YYYY-MM-DD
+  quote_id: z.string().uuid().optional().nullable(),
+});

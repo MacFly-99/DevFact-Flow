@@ -184,6 +184,15 @@ importers:
       '@react-pdf/renderer':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.1)
+      '@upstash/ratelimit':
+        specifier: ^2.2.3
+        version: 2.2.3(@upstash/redis@1.41.1)
+      '@upstash/redis':
+        specifier: ^1.41.1
+        version: 1.41.1
+      '@vercel/functions':
+        specifier: ^3.11.4
+        version: 3.11.4
       better-auth:
         specifier: ^1.7.14
         version: 1.7.27(@prisma/client@7.10.1(prisma@7.10.1(@types/node@20.19.43)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3))(typescript@5.9.3))(mysql2@3.24.4(@types/node@20.19.43))(next@16.4.6(@babel/core@7.29.13(supports-color@7.2.0))(@playwright/test@1.65.1)(@types/node@20.19.43)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pg@8.23.1)(prisma@7.10.1(@types/node@20.19.43)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@5.9.3))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.1.1(@types/node@20.19.43)(jsdom@30.1.3(@noble/hashes@2.4.0))(vite@8.3.8(@types/node@20.19.43)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)))
@@ -1954,6 +1963,41 @@ packages:
     resolution: {integrity: sha512-DpLMlAqlrk4zBVK3DiDjwKD0oq7pZNy+8BiIBRuByqb6dm5jsdoLMhIiyh/xR7+WejaW/1Ui+XgbgMNa4+zWJg==}
     cpu: [x64]
     os: [win32]
+
+  '@upstash/core-analytics@0.0.10':
+    resolution: {integrity: sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==}
+    engines: {node: '>=16.0.0'}
+
+  '@upstash/ratelimit@2.2.3':
+    resolution: {integrity: sha512-cf4c8LBtJenbizSWYvWN+9vh7z+ywnZaaRH+J+p3w7i06ZUAXAeKzGQc19hgrSlQM8REtvS/CHMnsT+8lXV4VQ==}
+    peerDependencies:
+      '@upstash/redis': ^1.41.1
+
+  '@upstash/redis@1.41.1':
+    resolution: {integrity: sha512-HT5ixMRbylOM058GETYbh1DKV0Q5qL5bRf7YpOzpp3VR2YZNoYqsWznPvFWNFQEBTPcGANWoCDvA1+M2f6ub4w==}
+
+  '@vercel/cli-config@0.4.0':
+    resolution: {integrity: sha512-7+DnWjfcHA/u2FjiPMknhlqZFmJZZq1qS5ziIxNH+3zNBo2U4NQjkJABKDGMZlLBlBLK94RXuA2dceC4SCFumA==}
+
+  '@vercel/cli-exec@1.0.1':
+    resolution: {integrity: sha512-g9XerViJ/paZujufXYcu5XYI2vU2rtB4sgdpjUHde5RnOkdmpu0ngH46LCFGHoPXO/C+qDPSczIHIRN+8Q2YKQ==}
+    engines: {node: '>= 18'}
+
+  '@vercel/functions@3.11.4':
+    resolution: {integrity: sha512-2qi3V2qLE57l62CXUKwriRAFa4l5/HIbeRkoRpuIvmGYHqJWXdUKoTMxJP5efSRJtU0x9qV/u0iBHpm+8mGevA==}
+    engines: {node: '>= 20'}
+    peerDependencies:
+      '@aws-sdk/credential-provider-web-identity': '*'
+      ws: '>=8'
+    peerDependenciesMeta:
+      '@aws-sdk/credential-provider-web-identity':
+        optional: true
+      ws:
+        optional: true
+
+  '@vercel/oidc@5.0.0':
+    resolution: {integrity: sha512-lDKpcgVemApinr+DfFd3LYUac9yarx+Q/I0yJpdSfTdYQMK/Qso7BBYIc1YIgo6czRnpBi3hZTGBrmOrm/A+Xg==}
+    engines: {node: '>= 20'}
 
   '@visx/curve@4.0.1-alpha.0':
     resolution: {integrity: sha512-jRu61Uz274pV1zyioXmboyrLutYbnKsgjj4njSGCnhdXj5GkZvZbg+ThDb6oOzoAnJOBRLz4rzPlWvNJOzuVMg==}
@@ -3769,6 +3813,10 @@ packages:
     resolution: {integrity: sha512-weP+BZ8MVNnlCm8c0Qdc1WSWq4Qn7I+9CJGm7Qali6g44e/PUzbjNqJX5NJ9ljlNMosfJvg1fKEGILklK9cwnw==}
     engines: {node: '>=18'}
 
+  os-paths@4.4.0:
+    resolution: {integrity: sha512-wrAwOeXp1RRMFfQY8Sy7VaGVmPocaLwSFOYCGKSyo8qmJ+/yaafCl5BCA1IQZWqFSRBrKDYFeR9d/VyQzfH/jg==}
+    engines: {node: '>= 6.0'}
+
   own-keys@1.0.2:
     resolution: {integrity: sha512-19YVAg7T+WTrxggPukVq7DjTv6+PJ867TmhCvBsYwmbFCsZd344rq2Ld1p0wo8f8Qrrhgp82c6FJRqdXWtSEhg==}
     engines: {node: '>= 0.4'}
@@ -4513,6 +4561,9 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
+  uncrypto@0.1.3:
+    resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
+
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
@@ -4716,6 +4767,14 @@ packages:
   wsl-utils@1.0.1:
     resolution: {integrity: sha512-c16PKLIRxBYpR3jSWsdS7SFp0COm5SOQdiFjY818dYFHJbMGuLBszpF07LBWmOS1uzrHa9VGdynsEgoeKy0oOQ==}
     engines: {node: '>=20'}
+
+  xdg-app-paths@5.1.0:
+    resolution: {integrity: sha512-RAQ3WkPf4KTU1A8RtFx3gWywzVKe00tfOPFfl2NDGqbIFENQO4kqAJp7mhQjNj/33W5x5hiWWUdyfPq/5SU3QA==}
+    engines: {node: '>=6'}
+
+  xdg-portable@7.3.0:
+    resolution: {integrity: sha512-sqMMuL1rc0FmMBOzCpd0yuy9trqF2yTTVe+E9ogwCSWQCdDEtQUwrZPT6AxqtsFGRNxycgncbP/xmOOSPw5ZUw==}
+    engines: {node: '>= 6.0'}
 
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
@@ -6275,6 +6334,37 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.13.0':
     optional: true
+
+  '@upstash/core-analytics@0.0.10':
+    dependencies:
+      '@upstash/redis': 1.41.1
+
+  '@upstash/ratelimit@2.2.3(@upstash/redis@1.41.1)':
+    dependencies:
+      '@upstash/core-analytics': 0.0.10
+      '@upstash/redis': 1.41.1
+
+  '@upstash/redis@1.41.1':
+    dependencies:
+      uncrypto: 0.1.3
+
+  '@vercel/cli-config@0.4.0':
+    dependencies:
+      xdg-app-paths: 5.1.0
+      zod: 4.6.7
+
+  '@vercel/cli-exec@1.0.1':
+    dependencies:
+      execa: 5.1.1
+
+  '@vercel/functions@3.11.4':
+    dependencies:
+      '@vercel/oidc': 5.0.0
+
+  '@vercel/oidc@5.0.0':
+    dependencies:
+      '@vercel/cli-config': 0.4.0
+      '@vercel/cli-exec': 1.0.1
 
   '@visx/curve@4.0.1-alpha.0':
     dependencies:
@@ -8195,6 +8285,8 @@ snapshots:
       string-width: 7.2.0
       strip-ansi: 7.2.0
 
+  os-paths@4.4.0: {}
+
   own-keys@1.0.2:
     dependencies:
       call-bound: 1.0.4
@@ -9018,6 +9110,8 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
+  uncrypto@0.1.3: {}
+
   undici-types@6.21.0: {}
 
   undici@7.30.2: {}
@@ -9222,6 +9316,14 @@ snapshots:
     dependencies:
       is-wsl: 3.1.1
       powershell-utils: 0.2.1
+
+  xdg-app-paths@5.1.0:
+    dependencies:
+      xdg-portable: 7.3.0
+
+  xdg-portable@7.3.0:
+    dependencies:
+      os-paths: 4.4.0
 
   xml-name-validator@5.0.0: {}
 

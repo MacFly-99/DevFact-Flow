@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
+import { limiters } from "@/lib/rate-limit";
 
 const ClientSchema = z.object({
   companyName: z.string().max(100).optional(),
@@ -16,6 +17,9 @@ const ClientSchema = z.object({
 export async function createClient(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const rawData = Object.fromEntries(formData.entries());
   const validatedFields = ClientSchema.safeParse(rawData);
@@ -47,6 +51,9 @@ export async function createClient(formData: FormData) {
 export async function deleteClient(clientId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) throw new Error("Non autorisé");
+
+  const { success, reset } = await limiters.actions.limit(session.user.id);
+  if (!success) throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil((reset - Date.now()) / 1000)} secondes.`);
 
   const client = await prisma.client.findFirst({
     where: { id: clientId, userId: session.user.id },
