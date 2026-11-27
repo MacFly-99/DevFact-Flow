@@ -11,16 +11,16 @@ export default async function ExpensesPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/");
 
-  // 1. Récupération des données via Prisma
+  // 1. Récupération des données via Prisma (sécurisé avec fallback tableau vide)
   const transactions = await prisma.expense.findMany({
     where: { userId: session.user.id },
     orderBy: { date: "desc" }
-  });
+  }) || [];
 
   const quotes = await prisma.quote.findMany({
     where: { userId: session.user.id },
     include: { client: true },
-  });
+  }) || [];
 
   const quoteMap = new Map(quotes.map(q => [q.id, { 
     number: q.number, 
@@ -29,7 +29,7 @@ export default async function ExpensesPage() {
   }]));
 
   // 2. Calculs des totaux
-  const totalGeneral = transactions.reduce((acc, tx) => acc + tx.montant, 0);
+  const totalGeneral = transactions.reduce((acc, tx) => acc + (tx.montant || 0), 0);
 
   const monthlyData = Array.from({ length: 6 }).map((_, i) => {
     const d = new Date();
@@ -43,10 +43,13 @@ export default async function ExpensesPage() {
   });
 
   transactions.forEach(tx => {
-    const txDate = new Date(tx.date);
-    const monthData = monthlyData.find(m => m.month === txDate.getMonth() && m.year === txDate.getFullYear());
-    if (monthData) {
-      monthData.total += tx.montant;
+    // 3. Sécurité sur la date (évite le crash si date invalide)
+    const txDate = tx.date ? new Date(tx.date) : null;
+    if (txDate && !isNaN(txDate.getTime())) {
+      const monthData = monthlyData.find(m => m.month === txDate.getMonth() && m.year === txDate.getFullYear());
+      if (monthData) {
+        monthData.total += (tx.montant || 0);
+      }
     }
   });
 
