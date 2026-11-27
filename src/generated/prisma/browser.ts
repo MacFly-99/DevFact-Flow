@@ -63,6 +63,11 @@ export type Invoice = Prisma.InvoiceModel
  */
 export type InvoiceItem = Prisma.InvoiceItemModel
 /**
+ * Model Expense
+ * 
+ */
+export type Expense = Prisma.ExpenseModel
+/**
  * Model RateLimit
  * 
  */

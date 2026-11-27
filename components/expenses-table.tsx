@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { updateExpenseAction, deleteExpenseAction } from "@/app/expenses/actions";
-import { Transaction } from "@/lib/devspend";
+import { Expense } from "@/src/generated/prisma/client";
 import { Pencil, Trash2, Lock, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -18,11 +18,11 @@ export function ExpensesTable({
   transactions, 
   quoteMap 
 }: { 
-  transactions: Transaction[], 
+  transactions: Expense[], 
   quoteMap: Map<string, { number: string, clientName: string, status: string }> 
 }) {
   const [isPending, startTransition] = useTransition();
-  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [editingTx, setEditingTx] = useState<Expense | null>(null);
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ export function ExpensesTable({
     };
 
     startTransition(async () => {
-      const result = await updateExpenseAction(editingTx.id, data, editingTx.quote_id);
+      const result = await updateExpenseAction(editingTx.id, data, editingTx.quoteId);
       if (result.success) {
         toast.success("Dépense modifiée !");
         setEditingTx(null);
@@ -47,7 +47,7 @@ export function ExpensesTable({
     });
   };
 
-  const handleDelete = (id: number, quoteId?: string | null) => {
+  const handleDelete = (id: string, quoteId?: string | null) => {
     startTransition(async () => {
       const result = await deleteExpenseAction(id, quoteId);
       if (result.success) {
@@ -76,7 +76,7 @@ export function ExpensesTable({
         </thead>
         <tbody className="divide-y divide-white/5">
           {transactions.map((tx) => {
-            const linkedQuote = tx.quote_id ? quoteMap.get(tx.quote_id) : null;
+            const linkedQuote = tx.quoteId ? quoteMap.get(tx.quoteId) : null;
             const isLocked = linkedQuote?.status === "ACCEPTED";
 
             return (
@@ -87,9 +87,9 @@ export function ExpensesTable({
                   <div className="flex flex-col gap-1 items-start">
                     <span className="bg-white/10 px-2 py-1 rounded-md text-xs">{tx.categorie}</span>
                     
-                    {linkedQuote && tx.quote_id && (
+                    {linkedQuote && tx.quoteId && (
                       <Link 
-                        href={`/quotes/${tx.quote_id}`} 
+                        href={`/quotes/${tx.quoteId}`} 
                         className="flex items-center gap-1 text-[10px] text-brand-accent bg-brand-accent/10 px-2 py-1 rounded-md border border-brand-accent/20 hover:bg-brand-accent/20 hover:scale-105 transition-all cursor-pointer"
                         title="Voir le devis associé"
                       >
@@ -168,7 +168,7 @@ export function ExpensesTable({
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(tx.id, tx.quote_id)} disabled={isPending} className="bg-red-500 hover:bg-red-600 text-white font-bold">
+                            <AlertDialogAction onClick={() => handleDelete(tx.id, tx.quoteId)} disabled={isPending} className="bg-red-500 hover:bg-red-600 text-white font-bold">
                               Supprimer
                             </AlertDialogAction>
                           </AlertDialogFooter>

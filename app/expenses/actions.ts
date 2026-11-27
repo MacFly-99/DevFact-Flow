@@ -1,14 +1,27 @@
 "use server";
 
-import { createTransaction, updateTransaction, deleteTransaction } from "@/lib/devspend";
-import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function addExpenseAction(data: any) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) throw new Error("Non autorisé");
+
   try {
-    await createTransaction(data);
+    await prisma.expense.create({
+      data: {
+        description: data.description,
+        montant: data.montant,
+        categorie: data.categorie,
+        date: new Date(data.date),
+        userId: session.user.id,
+        quoteId: data.quote_id || null,
+      }
+    });
+
     revalidatePath("/expenses");
-    // Si c'est lié à un devis, on rafraîchit aussi la page du devis
     if (data.quote_id) {
       revalidatePath(`/quotes/${data.quote_id}`);
     }
@@ -18,9 +31,12 @@ export async function addExpenseAction(data: any) {
   }
 }
 
-export async function updateExpenseAction(id: number, data: any, quoteId?: string | null) {
+export async function updateExpenseAction(id: string, data: any, quoteId?: string | null) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) throw new Error("Non autorisé");
+
   try {
-    // VÉRIFICATION DE SÉCURITÉ BACKEND
+    // VÉRIFICATION DE SÉCURITÉ
     if (quoteId) {
       const quote = await prisma.quote.findUnique({ where: { id: quoteId } });
       if (quote?.status === "ACCEPTED") {
@@ -28,7 +44,16 @@ export async function updateExpenseAction(id: number, data: any, quoteId?: strin
       }
     }
 
-    await updateTransaction(id, data);
+    await prisma.expense.update({
+      where: { id: id },
+      data: {
+        description: data.description,
+        montant: data.montant,
+        categorie: data.categorie,
+        date: new Date(data.date),
+      }
+    });
+
     revalidatePath("/expenses");
     if (quoteId) revalidatePath(`/quotes/${quoteId}`);
     return { success: true };
@@ -37,9 +62,12 @@ export async function updateExpenseAction(id: number, data: any, quoteId?: strin
   }
 }
 
-export async function deleteExpenseAction(id: number, quoteId?: string | null) {
+export async function deleteExpenseAction(id: string, quoteId?: string | null) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) throw new Error("Non autorisé");
+
   try {
-    // VÉRIFICATION DE SÉCURITÉ BACKEND
+    // VÉRIFICATION DE SÉCURITÉ
     if (quoteId) {
       const quote = await prisma.quote.findUnique({ where: { id: quoteId } });
       if (quote?.status === "ACCEPTED") {
@@ -47,7 +75,8 @@ export async function deleteExpenseAction(id: number, quoteId?: string | null) {
       }
     }
 
-    await deleteTransaction(id);
+    await prisma.expense.delete({ where: { id: id } });
+
     revalidatePath("/expenses");
     if (quoteId) revalidatePath(`/quotes/${quoteId}`);
     return { success: true };

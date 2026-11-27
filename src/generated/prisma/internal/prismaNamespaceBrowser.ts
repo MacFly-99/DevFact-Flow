@@ -60,6 +60,7 @@ export const ModelName = {
   QuoteItem: 'QuoteItem',
   Invoice: 'Invoice',
   InvoiceItem: 'InvoiceItem',
+  Expense: 'Expense',
   RateLimit: 'RateLimit'
 } as const
 
@@ -213,6 +214,21 @@ export const InvoiceItemScalarFieldEnum = {
 } as const
 
 export type InvoiceItemScalarFieldEnum = (typeof InvoiceItemScalarFieldEnum)[keyof typeof InvoiceItemScalarFieldEnum]
+
+
+export const ExpenseScalarFieldEnum = {
+  id: 'id',
+  description: 'description',
+  montant: 'montant',
+  categorie: 'categorie',
+  date: 'date',
+  quoteId: 'quoteId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
 
 
 export const RateLimitScalarFieldEnum = {

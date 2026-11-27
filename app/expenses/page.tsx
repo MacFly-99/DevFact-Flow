@@ -1,4 +1,4 @@
-import { getSpendSummary, getTransactions } from "@/lib/devspend";
+import prisma from "@/lib/prisma";
 import { Wallet, TrendingDown, Receipt, Activity } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -6,20 +6,21 @@ import { redirect } from "next/navigation";
 import { ExpensesTable } from "@/components/expenses-table";
 import { AddExpenseButton } from "@/components/add-expense-button";
 import { ExpensesChart } from "@/components/expenses-chart";
-import prisma from "@/lib/prisma";
 
 export default async function ExpensesPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) redirect("/");
 
-  const [spendData, transactions, quotes] = await Promise.all([
-    getSpendSummary(),
-    getTransactions(),
-    prisma.quote.findMany({
-      where: { userId: session.user.id },
-      include: { client: true },
-    })
-  ]);
+  // 1. Récupération des données via Prisma
+  const transactions = await prisma.expense.findMany({
+    where: { userId: session.user.id },
+    orderBy: { date: "desc" }
+  });
+
+  const quotes = await prisma.quote.findMany({
+    where: { userId: session.user.id },
+    include: { client: true },
+  });
 
   const quoteMap = new Map(quotes.map(q => [q.id, { 
     number: q.number, 
@@ -27,7 +28,9 @@ export default async function ExpensesPage() {
     status: q.status
   }]));
 
-  // CALCUL DES DÉPENSES DES 6 DERNIERS MOIS
+  // 2. Calculs des totaux
+  const totalGeneral = transactions.reduce((acc, tx) => acc + tx.montant, 0);
+
   const monthlyData = Array.from({ length: 6 }).map((_, i) => {
     const d = new Date();
     d.setMonth(d.getMonth() - (5 - i));
@@ -72,7 +75,7 @@ export default async function ExpensesPage() {
               <Receipt className="h-6 w-6 text-red-400" />
             </div>
             <p className="text-red-400 text-sm font-medium mb-1">Total des Dépenses</p>
-            <p className="text-4xl font-bold text-white">{spendData.total_general.toFixed(2)} €</p>
+            <p className="text-4xl font-bold text-white">{totalGeneral.toFixed(2)} €</p>
           </div>
         </div>
 
