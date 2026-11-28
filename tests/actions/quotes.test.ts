@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createQuote } from '@/app/quotes/actions';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { limiters } from '@/lib/rate-limit';
 
-// On ajoute revalidateTag au mock
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
@@ -23,9 +23,26 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
+vi.mock('@/lib/rate-limit', () => ({
+  limiters: {
+    actions: {
+      limit: vi.fn(),
+    },
+  },
+}));
+
 describe('Server Action: createQuote', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    
+    vi.mocked(limiters.actions.limit).mockResolvedValue({ 
+      success: true, 
+      reset: Date.now() + 60000,
+      limit: 100,
+      remaining: 99,
+      pending: Promise.resolve()
+    });
+    
     (auth.api.getSession as any).mockResolvedValue({ user: { id: 'user_123' } });
     (prisma.quote.count as any).mockResolvedValue(0); 
   });
@@ -50,12 +67,15 @@ describe('Server Action: createQuote', () => {
 
     await createQuote(formData);
 
+    const currentYear = new Date().getFullYear();
+    const expectedNumber = `DEV-${currentYear}-001-USER`; 
+
     expect(prisma.quote.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         total: 1000,       
         taxAmount: 200,    
         totalTTC: 1200,    
-        number: 'DEV-2026-001-USER', 
+        number: expectedNumber, 
       }),
     });
   });

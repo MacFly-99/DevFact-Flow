@@ -3,10 +3,18 @@ import { test, expect } from '@playwright/test';
 test('Parcours complet : Devis -> Acceptation -> Facture', async ({ page }) => {
   test.setTimeout(90000); 
 
+  const email = process.env.TEST_ADMIN_EMAIL;
+  const password = process.env.TEST_ADMIN_PASSWORD;
+
+  // Sécurité : On bloque le test si les variables ne sont pas définies
+  if (!email || !password) {
+    throw new Error("❌ Les variables TEST_ADMIN_EMAIL et TEST_ADMIN_PASSWORD sont manquantes dans .env.test");
+  }
+
   // 1. Connexion
   await page.goto('/');
-  await page.fill('input[name="email"]', 'admin@devfact-flow.com');
-  await page.fill('input[name="password"]', '4dm1nP4ss!');
+  await page.fill('input[name="email"]', email);
+  await page.fill('input[name="password"]', password);
   
   const submitButton = page.locator('button[type="submit"]');
   await expect(submitButton).toBeEnabled();
@@ -64,7 +72,7 @@ test('Parcours complet : Devis -> Acceptation -> Facture', async ({ page }) => {
   
   await page.getByRole('menuitem', { name: 'ACCEPTED' }).click();
   
-  // On cible précisément le badge (le premier élément) et non le toast
+  // On cible précisément le badge
   await expect(page.locator('div.uppercase:has-text("ACCEPTED")').first()).toBeVisible({ timeout: 10000 });
 
   // 6. On le convertit en facture

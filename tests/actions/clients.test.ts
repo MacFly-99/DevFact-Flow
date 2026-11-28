@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createClient } from '@/app/clients/actions';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { limiters } from '@/lib/rate-limit'; 
 
-// On ajoute revalidateTag au mock
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(), 
@@ -21,9 +21,25 @@ vi.mock('next/headers', () => ({
   headers: vi.fn(() => Promise.resolve(new Headers())),
 }));
 
+vi.mock('@/lib/rate-limit', () => ({
+  limiters: {
+    actions: {
+      limit: vi.fn(),
+    },
+  },
+}));
+
 describe('Server Action: createClient', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    
+    vi.mocked(limiters.actions.limit).mockResolvedValue({ 
+      success: true, 
+      reset: Date.now() + 60000,
+      limit: 100,
+      remaining: 99,
+      pending: Promise.resolve() 
+    });
   });
 
   it('doit refuser si l\'utilisateur n\'est pas connecté', async () => {
@@ -40,7 +56,7 @@ describe('Server Action: createClient', () => {
     (auth.api.getSession as any).mockResolvedValue({ user: { id: 'user_123' } });
 
     const formData = new FormData();
-    formData.append('name', ''); // Nom vide (Zod doit bloquer)
+    formData.append('name', ''); 
     formData.append('email', 'email-invalide');
 
     await expect(createClient(formData)).rejects.toThrow();
