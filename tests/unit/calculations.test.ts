@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-
-// On simule une fonction que l'on pourrait avoir dans lib/utils.ts
-function calculateTTC(ht: number, taxRate: number): number {
-  if (ht < 0) throw new Error("Le prix ne peut pas être négatif");
-  return ht + (ht * (taxRate / 100));
-}
+import { calculateTTC } from '@/lib/utils';
 
 describe('Calculs de facturation', () => {
   it('doit calculer le TTC correctement avec 20% de TVA', () => {
